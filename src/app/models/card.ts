@@ -1,25 +1,34 @@
+import {Entity} from "./entity";
 
-export class Card {
+export class Card extends Entity {
 
   private _value;
   private _power;
   private _image: HTMLImageElement;
+  private _frontImage: HTMLImageElement;
+  private _backImage: HTMLImageElement;
   private _name: any;
   private _color: string;
+  private _visible: boolean;
 
-  constructor(
-    name: string,
-    color: string) {
-
+  constructor(name: string, color: string) {
+    super(0, 0, 0, 0);
     this._name = name;
     this._color = color;
+    this._visible = false;
     this._value = this.getValue();
     this._power = (this.color+this.name) in this.getPowerMap() ? this.getPowerMap()[this.color+this.name] : null;
-    this._image = this.loadImage();
+    this._frontImage = new Image();
+    this._backImage = new Image();
+    this._image = this.loadImages();
   }
 
   get value() {
     return this._value;
+  }
+
+  get visible() {
+    return this._visible;
   }
 
   get power() {
@@ -93,12 +102,26 @@ export class Card {
     return !this.isBlack();
   }
 
-  loadImage()
+  loadImages()
   {
-    let image = new Image();
-    image.src = "./assets/images/cards/card"+(this.color[0].toUpperCase() + this.color.slice(1))+this.name+".png";
+    this._frontImage.src = "./assets/images/cards/card"+(this.color[0].toUpperCase() + this.color.slice(1))+this.name+".png";
+    this._backImage.src = "./assets/images/cards/cardBack_blue5.png";
 
-    return image;
+    return this.visible ? this._frontImage : this._backImage;
+  }
+
+  showCard(show: boolean = true) {
+    this._image = show ? this._frontImage : this._backImage;
+    this._visible = show;
+  }
+
+  draw(ctx: CanvasRenderingContext2D): void {
+    ctx.drawImage(
+      this.image,
+      this.x,
+      this.y,
+      this.width,
+      this.height);
   }
 }
 
