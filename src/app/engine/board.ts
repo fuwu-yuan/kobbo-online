@@ -38,6 +38,14 @@ export class Board {
     }
   }
 
+  /**
+   * Remove all entities (empty the board)
+   */
+  reset() {
+    this.entities = [];
+    this.ctx?.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+  }
+
   get ctx() {
     return this._ctx;
   }
@@ -49,7 +57,14 @@ export class Board {
     const y = event.clientY - rect.top
     this.entities.forEach(function (entity: Entity) {
       if (entity.intersect(x, y)) {
+        if (event.type === "mousemove") {
+          entity.hovered = true;
+        }
         entity.dispatcher.dispatch(event.type, event);
+      }else {
+        if (event.type === "mousemove") {
+          entity.hovered = false;
+        }
       }
     });
   }

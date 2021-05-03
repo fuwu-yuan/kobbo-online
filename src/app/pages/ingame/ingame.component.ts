@@ -3,8 +3,9 @@ import {StockService} from "../../services/stock.service";
 import {Card} from "../../models/card";
 import {Player} from "../../models/player";
 import {Config} from "../../services/config.service";
-import {Board} from "../../models/board";
-import {Entity} from "../../models/entity";
+import {Board} from "../../engine/board";
+import {Entity} from "../../engine/entity";
+import {Button} from "../../models/button";
 
 @Component({
   selector: 'app-ingame',
@@ -29,15 +30,60 @@ export class IngameComponent implements OnInit {
 
   ngOnInit(): void {
     this.board = new Board(this.canvas, this.config);
-    this.stockService.initStock();
-    this.initGame();
+    //this.initGame();
     this.board.start();
+    this.stepMain();
+  }
+
+  stepMain(): void {
+    this.board?.reset();
+    let self = this;
+    let buttonsWidth = 200;
+    let buttonHeight = 60;
+    let createButton = new Button(
+      this.config.board.size.width / 4 - buttonsWidth / 2,
+      this.config.board.size.height / 2 - buttonHeight / 2,
+      buttonsWidth,
+      buttonHeight,
+      "Créer une partie"
+    );
+    let joinButton = new Button(
+      this.config.board.size.width / 4 * 3 - buttonsWidth / 2,
+      this.config.board.size.height / 2 - buttonHeight / 2,
+      buttonsWidth,
+      buttonHeight,
+      "Rejoindre une partie"
+    );
+    createButton.onMouseEvent("click", function(event: MouseEvent) {
+      console.log("Creating game !");
+      self.stepCreateGame();
+    });
+    joinButton.onMouseEvent("click", function(event: MouseEvent) {
+      console.log("Joining Game !");
+      self.stepJoinGame();
+    });
+
+    this.board?.addEntity(createButton);
+    this.board?.addEntity(joinButton);
+  }
+
+  stepCreateGame() {
+    this.board?.reset();
+    this.initGame();
+    this.startRound();
+  }
+
+  stepJoinGame() {
+    this.board?.reset();
+    //TODO
   }
 
   initGame(): void {
+    this.stockService.initStock();
     for (let i = 0; i < this.config.nbPlayers; i++) {
       this.players.push(new Player(i, "Player" + i, this.config));
     }
+    this.initBoard();
   }
 
   giveCardToPlayer(i: number, card: Card) {
@@ -81,13 +127,12 @@ export class IngameComponent implements OnInit {
           ctx.lineTo(self.config.board.size.width, self.config.board.size.height / 2);
           ctx.stroke();
         }
+        update() {}
       }(0, 0, self.config.board.size.width, self.config.board.size.height));
     }
   }
 
   startRound(): void {
-    this.initBoard();
-
     let self = this;
     let playerId = 0;
     let cardId = 0;
@@ -99,7 +144,7 @@ export class IngameComponent implements OnInit {
         playerId = 0;
         cardId++;
       }
-      if (playerId === self.config.nbPlayers && cardId == 4) {
+      if (playerId === 0 && cardId == 4) {
         clearInterval(interval)
       }
     }, 500);

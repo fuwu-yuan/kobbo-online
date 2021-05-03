@@ -7,6 +7,7 @@ export abstract class Entity {
   private _width: number;
   private _height: number;
   private _dispatcher = new Dispatcher();
+  public hovered: boolean = false;
 
   constructor(x: number, y: number, width: number, height: number) {
     this._x = x;
@@ -80,8 +81,5 @@ export abstract class Entity {
   }
 
   abstract draw(ctx: CanvasRenderingContext2D): void;
-
-  update() {
-
-  }
+  abstract update(): void;
 }

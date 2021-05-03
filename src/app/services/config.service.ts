@@ -22,6 +22,6 @@ export class Config {
     }
   }
 
-  public nbPlayers: number = 2;
+  public nbPlayers: number = 4;
 
 }

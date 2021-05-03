@@ -1,4 +1,4 @@
-import {Entity} from "./entity";
+import {Entity} from "../engine/entity";
 
 export class Card extends Entity {
 
@@ -122,6 +122,9 @@ export class Card extends Entity {
       this.y,
       this.width,
       this.height);
+  }
+
+  update(): void {
   }
 }
 
