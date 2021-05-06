@@ -1,8 +1,7 @@
-import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
+/**
+ * Your game config
+ */
+//TODO déplacer la config spécifique au KOBBO dans une classe perso
 export class Config {
 
   public game : { FPS: number } = {

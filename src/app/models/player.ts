@@ -1,5 +1,5 @@
 import {Card} from "./card";
-import {Config} from "../services/config.service";
+import {Config} from "../engine/config";
 
 export class Player {
 

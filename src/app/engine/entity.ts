@@ -1,5 +1,11 @@
 import {Dispatcher} from "../classes/Dispatcher";
+import {Board} from "./board";
 
+/**
+ * The most important part of your game
+ * To build a game, you need to create entities and add it to your board
+ *
+ */
 export abstract class Entity {
   private _translate: {x: number, y:number} = {x: 0, y:0};
   private _x: number;
@@ -7,6 +13,7 @@ export abstract class Entity {
   private _width: number;
   private _height: number;
   private _dispatcher = new Dispatcher();
+  private _board: Board | null = null;
   public hovered: boolean = false;
 
   constructor(x: number, y: number, width: number, height: number) {
@@ -14,6 +21,14 @@ export abstract class Entity {
     this._y = y;
     this._width = width;
     this._height = height;
+  }
+
+  get board(): Board | null {
+    return this._board;
+  }
+
+  set board(value: Board | null) {
+    this._board = value;
   }
 
   get translate() {
@@ -73,10 +88,10 @@ export abstract class Entity {
 
   /**
    * Listen mouse event on this entity
-   * @param event An event from this list : click, contextmenu, dblclick, mousedown, mouseenter, mouseleave, mousemove, mouseout, mouseover, mouseup
+   * @param event An event from this list : click, dblclick, contextmenu, mousedown, mouseup, mouseenter, mouseleave, mousemove
    * @param callback
    */
-  onMouseEvent(event: string, callback: (event: MouseEvent) => void) {
+  onMouseEvent(event: "click" | "dblclick" | "contextmenu" | "mousedown" | "mouseup" | "mouseenter" | "mouseleave" | "mousemove", callback: (event: MouseEvent) => void) {
     this.dispatcher.on(event, callback);
   }
 

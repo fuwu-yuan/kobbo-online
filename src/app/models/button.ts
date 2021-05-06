@@ -2,6 +2,7 @@ import {Entity} from "../engine/entity";
 
 export class Button extends Entity {
   private text: string;
+
   private _strokeColor: string = "rgba(230,77,59, 1.0)";
   private _fillColor: string = "rgba(0, 0, 0, 0.0)";
   private _hoverStrokeColor: string = "rgba(230,77,59, 1.0)";
@@ -21,103 +22,9 @@ export class Button extends Entity {
     super(x, y, width, height);
     this.onMouseEvent("mousedown", this.onMouseDown(this));
     this.onMouseEvent("mouseup", this.onMouseUp(this));
+    this.onMouseEvent("mouseenter", this.onMouseEnter(this));
+    this.onMouseEvent("mouseleave", this.onMouseLeave(this));
     this.text = text;
-  }
-
-  get hoverFillColor(): string {
-    return this._hoverFillColor;
-  }
-
-  set hoverFillColor(value: string) {
-    this._hoverFillColor = value;
-  }
-  get hoverStrokeColor(): string {
-    return this._hoverStrokeColor;
-  }
-
-  set hoverStrokeColor(value: string) {
-    this._hoverStrokeColor = value;
-  }
-  get fillColor(): string {
-    return this._fillColor;
-  }
-
-  set fillColor(value: string) {
-    this._fillColor = value;
-  }
-  get strokeColor(): string {
-    return this._strokeColor;
-  }
-
-  set strokeColor(value: string) {
-    this._strokeColor = value;
-  }
-
-  get clickFillColor(): string {
-    return this._clickFillColor;
-  }
-
-  set clickFillColor(value: string) {
-    this._clickFillColor = value;
-  }
-  get clickStrokeColor(): string {
-    return this._clickStrokeColor;
-  }
-
-  set clickStrokeColor(value: string) {
-    this._clickStrokeColor = value;
-  }
-
-  get clickFontColor(): string {
-    return this._clickFontColor;
-  }
-
-  set clickFontColor(value: string) {
-    this._clickFontColor = value;
-  }
-  get hoverFontColor(): string {
-    return this._hoverFontColor;
-  }
-
-  set hoverFontColor(value: string) {
-    this._hoverFontColor = value;
-  }
-  get fontColor(): string {
-    return this._fontColor;
-  }
-
-  set fontColor(value: string) {
-    this._fontColor = value;
-  }
-  get fontSize(): number {
-    return this._fontSize;
-  }
-
-  set fontSize(value: number) {
-    this._fontSize = value;
-  }
-
-  get clickFontSize(): number {
-    return this._clickFontSize;
-  }
-
-  set clickFontSize(value: number) {
-    this._clickFontSize = value;
-  }
-  get hoverFontSize(): number {
-    return this._hoverFontSize;
-  }
-
-  set hoverFontSize(value: number) {
-    this._hoverFontSize = value;
-  }
-
-  get radius(): { tl: number; tr: number; br: number; bl: number } {
-    return this._radius;
-  }
-
-  set radius(value: { tl: number; tr: number; br: number; bl: number }) {
-    this._radius = value;
   }
 
   private onMouseDown(self: Button) {
@@ -129,6 +36,18 @@ export class Button extends Entity {
   private onMouseUp(self: Button) {
     return (event: MouseEvent) => {
       self._clicked = false;
+    }
+  }
+
+  private onMouseEnter(self: Button) {
+    return (event: MouseEvent) => {
+      self.board?.changeCursor("pointer");
+    }
+  }
+
+  private onMouseLeave(self: Button) {
+    return (event: MouseEvent) => {
+      self.board?.changeCursor("default");
     }
   }
 
@@ -194,4 +113,35 @@ export class Button extends Entity {
   update(): void {
 
   }
+
+
+  /*********************
+   * Getters & Setters *
+   *********************/
+  get hoverFillColor(): string { return this._hoverFillColor; }
+  set hoverFillColor(value: string) { this._hoverFillColor = value; }
+  get hoverStrokeColor(): string { return this._hoverStrokeColor; }
+  set hoverStrokeColor(value: string) { this._hoverStrokeColor = value; }
+  get fillColor(): string { return this._fillColor; }
+  set fillColor(value: string) { this._fillColor = value; }
+  get strokeColor(): string { return this._strokeColor; }
+  set strokeColor(value: string) { this._strokeColor = value; }
+  get clickFillColor(): string { return this._clickFillColor; }
+  set clickFillColor(value: string) { this._clickFillColor = value; }
+  get clickStrokeColor(): string { return this._clickStrokeColor; }
+  set clickStrokeColor(value: string) { this._clickStrokeColor = value; }
+  get clickFontColor(): string { return this._clickFontColor; }
+  set clickFontColor(value: string) { this._clickFontColor = value; }
+  get hoverFontColor(): string { return this._hoverFontColor; }
+  set hoverFontColor(value: string) { this._hoverFontColor = value; }
+  get fontColor(): string { return this._fontColor; }
+  set fontColor(value: string) { this._fontColor = value; }
+  get fontSize(): number { return this._fontSize; }
+  set fontSize(value: number) { this._fontSize = value; }
+  get clickFontSize(): number { return this._clickFontSize; }
+  set clickFontSize(value: number) { this._clickFontSize = value; }
+  get hoverFontSize(): number { return this._hoverFontSize; }
+  set hoverFontSize(value: number) { this._hoverFontSize = value; }
+  get radius(): { tl: number; tr: number; br: number; bl: number } { return this._radius; }
+  set radius(value: { tl: number; tr: number; br: number; bl: number }) { this._radius = value; }
 }
