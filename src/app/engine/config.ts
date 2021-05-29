@@ -1,26 +1,18 @@
 /**
  * Your game config
  */
-//TODO déplacer la config spécifique au KOBBO dans une classe perso
-export class Config {
+export class BoardConfig {
 
   public game : { FPS: number } = {
     FPS: 30
   }
 
-  public board: { size: {width: number, height: number} } = {
+  public board: {
+    size: {width: number, height: number}, background: string } = {
     size: {
       width: 800,
       height: 800
-    }
+    },
+    background: "#eee"
   };
-  public cards: { size: {width: number, height: number} } = {
-    size: {
-      width: 140,
-      height: 190
-    }
-  }
-
-  public nbPlayers: number = 4;
-
 }

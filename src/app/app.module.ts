@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { IngameComponent } from './pages/ingame/ingame.component';
 import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
 import { HttpClientModule } from '@angular/common/http';
+import {Board} from "./engine/board";
 
 @NgModule({
   declarations: [
@@ -18,7 +19,7 @@ import { HttpClientModule } from '@angular/common/http';
     LoggerModule.forRoot({serverLoggingUrl: '/api/logs', level: NgxLoggerLevel.DEBUG, serverLogLevel: NgxLoggerLevel.ERROR}),
     HttpClientModule
   ],
-  providers: [],
+  providers: [Board],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

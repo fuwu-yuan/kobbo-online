@@ -1,11 +1,11 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {StockService} from "../../services/stock.service";
 import {Board} from "../../engine/board";
 import {MainStep} from "../../steps/main";
-import {Config} from "../../engine/config";
 import {CreateGameStep} from "../../steps/createGame";
 import {JoinGameStep} from "../../steps/joinGame";
 import {InGameStep} from "../../steps/ingame";
+import {NetworkManager} from "../../engine/network/network.manager";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-ingame',
@@ -14,22 +14,15 @@ import {InGameStep} from "../../steps/ingame";
 })
 export class IngameComponent implements OnInit {
 
-  @ViewChild('canvas', { static: true })
-  canvas!: ElementRef<HTMLCanvasElement>;
-
-  board: Board|null = null;
-
-  private config: Config;
-
   constructor(
-    private stockService: StockService,
+    private board: Board
   ) {
-    this.config = new Config();
   }
 
   ngOnInit(): void {
     /* Init and start board */
-    this.board = new Board(this.canvas, this.config);
+    this.board.name = "Kobbo";
+    this.board.version = "0.0.1";
     this.initSteps();
     this.board.start();
   }
@@ -44,7 +37,7 @@ export class IngameComponent implements OnInit {
         mainStep,
         new CreateGameStep(this.board as Board),
         new JoinGameStep(this.board as Board),
-        new InGameStep(this.board as Board, this.stockService)
+        new InGameStep(this.board as Board)
       ]);
     }
   }

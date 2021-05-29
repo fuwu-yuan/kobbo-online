@@ -1,5 +1,4 @@
 import {Card} from "./card";
-import {Config} from "../engine/config";
 
 export class Player {
 
@@ -7,13 +6,10 @@ export class Player {
   private _cards: (Card|null)[] = [null, null, null, null];
   private _name: string;
 
-  private config: Config;
-
-  constructor(id: number, name: string, config: Config) {
+  constructor(id: number, name: string) {
     this._id = id;
     this._cards = [];
     this._name = name;
-    this.config = config;
   }
 
   get id() {

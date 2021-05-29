@@ -1,29 +1,50 @@
-import {ElementRef} from "@angular/core";
+import {ElementRef, Injectable} from "@angular/core";
 import {Entity} from "./entity";
 import {GameStep} from "./gamestep";
-import {Config} from "./config";
+import {NetworkManager} from "./network/network.manager";
+import {BoardConfig} from "./config";
+import {HttpClient} from "@angular/common/http";
 
 /**
  * The borad is the main part of your Game
  */
+@Injectable({
+  providedIn: 'root'
+})
 export class Board {
-  canvas: ElementRef<HTMLCanvasElement>;
+  private _canvas: HTMLCanvasElement | undefined;
   entities: Entity[] = [];
-  private _ctx: CanvasRenderingContext2D;
-  private runningInterval: number | undefined;
-  private _config;
-  private defaultStrokeStyle: string | CanvasGradient | CanvasPattern;
-  private defaultFillStyle: string | CanvasGradient | CanvasPattern;
+  private readonly _ctx: CanvasRenderingContext2D;
+  private runningInterval: any;
+  private readonly _config;
+  private readonly defaultStrokeStyle: string | CanvasGradient | CanvasPattern;
+  private readonly defaultFillStyle: string | CanvasGradient | CanvasPattern;
   private steps: { [key: string]: GameStep; } = {};
   private _step: GameStep|null = null;
+  private readonly _networkManager: NetworkManager;
+  private _name: string;
+  private _version: string;
 
-  constructor(canvas: ElementRef<HTMLCanvasElement>, config: Config) {
-    this.canvas = canvas;
-    this._ctx = this.canvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
+  constructor(private http: HttpClient) {
+    this._name = "My BGE-Web Game";
+    this._version = "0.0.1";
+    this._networkManager = new NetworkManager(this, http);
+    this._config = new BoardConfig();
+    this.canvas = this.createCanvasElem();
+    this._ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.defaultStrokeStyle = this.ctx.strokeStyle;
     this.defaultFillStyle = this.ctx.fillStyle;
-    this._config = config;
     this.initEvents();
+  }
+
+  private createCanvasElem() {
+    const elem = document.createElement('canvas');
+    elem.width = this.config.board.size.width;
+    elem.height = this.config.board.size.height;
+    elem.style.cssText = 'background:' + this.config.board.background;
+    document.body.appendChild(elem);
+
+    return elem;
   }
 
   /**
@@ -62,6 +83,36 @@ export class Board {
     })
   }
 
+  get version(): string {
+    return this._version;
+  }
+
+  set version(value: string) {
+    this._version = value;
+  }
+  get name(): string {
+    return this._name;
+  }
+
+  set name(value: string) {
+    this._name = value;
+  }
+
+  /**
+   * Get Network Manager
+   */
+  get networkManager(): NetworkManager {
+    return this._networkManager;
+  }
+
+  get canvas(): HTMLCanvasElement {
+    return this._canvas as HTMLCanvasElement;
+  }
+
+  set canvas(value: HTMLCanvasElement) {
+    this._canvas = value;
+  }
+
   /**
    * Get the current step
    */
@@ -81,7 +132,7 @@ export class Board {
   /**
    * The the game config
    */
-  get config(): Config {
+  get config(): BoardConfig {
     return this._config;
   }
 
@@ -147,7 +198,7 @@ export class Board {
    * Clear the board (will be drawn again on next game loop)
    */
   public clear() {
-    this.ctx?.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx?.beginPath();
   }
 
@@ -174,7 +225,7 @@ export class Board {
    */
   private onMouseEvent(event: MouseEvent) {
     event.preventDefault();
-    const rect = this.canvas.nativeElement.getBoundingClientRect()
+    const rect = this.canvas.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
     this.entities.forEach(function (entity: Entity) {
@@ -203,18 +254,18 @@ export class Board {
    * @private
    */
   private initEvents() {
-    this.canvas.nativeElement.addEventListener('click', this.onMouseEvent.bind(this));
-    this.canvas.nativeElement.addEventListener('dblclick', this.onMouseEvent.bind(this));
+    this.canvas.addEventListener('click', this.onMouseEvent.bind(this));
+    this.canvas.addEventListener('dblclick', this.onMouseEvent.bind(this));
 
-    this.canvas.nativeElement.addEventListener('contextmenu', this.onMouseEvent.bind(this));
+    this.canvas.addEventListener('contextmenu', this.onMouseEvent.bind(this));
 
-    this.canvas.nativeElement.addEventListener('mousedown', this.onMouseEvent.bind(this));
-    this.canvas.nativeElement.addEventListener('mouseup', this.onMouseEvent.bind(this));
+    this.canvas.addEventListener('mousedown', this.onMouseEvent.bind(this));
+    this.canvas.addEventListener('mouseup', this.onMouseEvent.bind(this));
 
-    this.canvas.nativeElement.addEventListener('mouseenter', this.onMouseEvent.bind(this));
-    this.canvas.nativeElement.addEventListener('mouseleave', this.onMouseEvent.bind(this));
+    this.canvas.addEventListener('mouseenter', this.onMouseEvent.bind(this));
+    this.canvas.addEventListener('mouseleave', this.onMouseEvent.bind(this));
 
-    this.canvas.nativeElement.addEventListener('mousemove', this.onMouseEvent.bind(this));
+    this.canvas.addEventListener('mousemove', this.onMouseEvent.bind(this));
 
     //TODO keyboard events
   }
@@ -240,7 +291,7 @@ export class Board {
     let self = this;
     if (this.canvas) {
       /* Clear canvas */
-      this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.clear();
       this.entities.forEach(function(entity: Entity) {
         self.resetStyles();

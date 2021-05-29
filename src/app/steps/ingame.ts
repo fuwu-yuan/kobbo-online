@@ -1,21 +1,22 @@
 import {GameStep} from "../engine/gamestep";
-import {Button} from "../models/button";
 import {Player} from "../models/player";
 import {Card} from "../models/card";
 import {Entity} from "../engine/entity";
 import {Board} from "../engine/board";
-import {StockService} from "../services/stock.service";
+import {Stock} from "../models/stock";
+import {KobboConfig} from "../game/kobboConfig";
 
 export class InGameStep extends GameStep {
   name: string = "ingame";
 
-  private stockService: StockService;
+  private nbPlayers: number = 4;
 
+  private stock: Stock;
   private players: Player[] = [];
 
-  constructor(board: Board, stockService: StockService) {
+  constructor(board: Board) {
     super(board);
-    this.stockService = stockService;
+    this.stock = new Stock();
   }
 
   onEnter(): void {
@@ -30,9 +31,9 @@ export class InGameStep extends GameStep {
   }
 
   initGame(): void {
-    this.stockService.initStock();
-    for (let i = 0; i < this.board.config.nbPlayers; i++) {
-      this.players.push(new Player(i, "Player" + i, this.board.config));
+    this.stock.initStock();
+    for (let i = 0; i < this.nbPlayers; i++) {
+      this.players.push(new Player(i, "Player" + i));
     }
   }
 
@@ -60,10 +61,10 @@ export class InGameStep extends GameStep {
     let playerId = 0;
     let cardId = 0;
     let interval = setInterval(function() {
-      let card: Card = self.stockService.draw();
+      let card: Card = self.stock.draw();
       self.giveCardToPlayer(playerId, card);
       playerId++;
-      if (playerId === self.board.config.nbPlayers) {
+      if (playerId === self.nbPlayers) {
         playerId = 0;
         cardId++;
       }
@@ -81,8 +82,8 @@ export class InGameStep extends GameStep {
     };
 
     this.players[i].giveCard(card);
-    card.width = this.board.config.cards.size.width;
-    card.height = this.board.config.cards.size.height;
+    card.width = KobboConfig.cards.size.width;
+    card.height = KobboConfig.cards.size.height;
     card.x = (playerSpace.width/2)-(playerSpace.width/4*(([1, 3].includes(self.players[i].cards.length) ? 1 : -1)))-card.width/2;
     card.y = (playerSpace.height/2)-(playerSpace.height/4*((self.players[i].cards.length > 2 ? -1 : 1)))-card.height/2;
     card.translate = {

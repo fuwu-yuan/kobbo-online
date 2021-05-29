@@ -13,7 +13,10 @@ export abstract class GameStep {
     return this._board;
   }
 
+  onNetworkMessage(msg: string) {}
+  onPlayerJoin(data: any){}
+  onConnectionClosed(){}
+
   abstract onEnter(data: any): void;
   abstract onLeave(): void;
-
 }

@@ -24,11 +24,21 @@ export class MainStep extends GameStep {
     );
     createButton.onMouseEvent("click", function(event: MouseEvent) {
       console.log("Creating game !");
-      self.board.moveToStep("ingame");
+      let name = prompt("Nom de la partie");
+      if (name !== null) {
+        self.board.networkManager.createRoom(name, true)
+          .then((res) => {
+            console.log("Connecté et prêt !");
+            self.board.moveToStep("create_game");
+          })
+          .catch((err) => {
+            alert(err.message);
+          });
+      }
     });
     joinButton.onMouseEvent("click", function(event: MouseEvent) {
       console.log("Joining Game !");
-      self.board.moveToStep("join_game");
+      self.board.moveToStep("main");
     });
 
     this.board.addEntity(createButton);
