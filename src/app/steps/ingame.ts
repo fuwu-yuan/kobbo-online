@@ -9,8 +9,6 @@ import {KobboConfig} from "../game/kobboConfig";
 export class InGameStep extends GameStep {
   name: string = "ingame";
 
-  private nbPlayers: number = 4;
-
   private stock: Stock;
   private players: Player[] = [];
 
@@ -19,8 +17,9 @@ export class InGameStep extends GameStep {
     this.stock = new Stock();
   }
 
-  onEnter(): void {
+  onEnter(data: any): void {
     console.log("Entering InGame");
+    this.players = data.players;
     this.initGame();
     this.initBoard();
     this.startRound();
@@ -32,9 +31,6 @@ export class InGameStep extends GameStep {
 
   initGame(): void {
     this.stock.initStock();
-    for (let i = 0; i < this.nbPlayers; i++) {
-      this.players.push(new Player(i, "Player" + i));
-    }
   }
 
   initBoard(): void {
@@ -64,7 +60,7 @@ export class InGameStep extends GameStep {
       let card: Card = self.stock.draw();
       self.giveCardToPlayer(playerId, card);
       playerId++;
-      if (playerId === self.nbPlayers) {
+      if (playerId === self.players.length) {
         playerId = 0;
         cardId++;
       }
@@ -96,7 +92,7 @@ export class InGameStep extends GameStep {
         const x = event.clientX;
         const y = event.clientY;
         console.log("x: "+ x + " | y" + y)
-        card.showCard(!card.visible);
+        card.showCard(!card.cardVisible);
       });
     }
   }

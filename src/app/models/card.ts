@@ -9,13 +9,13 @@ export class Card extends Entity {
   private _backImage: HTMLImageElement;
   private _name: any;
   private _color: string;
-  private _visible: boolean;
+  private _cardVisible: boolean;
 
   constructor(name: string, color: string) {
     super(0, 0, 0, 0);
     this._name = name;
     this._color = color;
-    this._visible = false;
+    this._cardVisible = false;
     this._value = this.getValue();
     this._power = (this.color+this.name) in this.getPowerMap() ? this.getPowerMap()[this.color+this.name] : null;
     this._frontImage = new Image();
@@ -27,8 +27,8 @@ export class Card extends Entity {
     return this._value;
   }
 
-  get visible() {
-    return this._visible;
+  get cardVisible() {
+    return this._cardVisible;
   }
 
   get power() {
@@ -107,12 +107,12 @@ export class Card extends Entity {
     this._frontImage.src = "./assets/images/cards/card"+(this.color[0].toUpperCase() + this.color.slice(1))+this.name+".png";
     this._backImage.src = "./assets/images/cards/cardBack_blue5.png";
 
-    return this.visible ? this._frontImage : this._backImage;
+    return this.cardVisible ? this._frontImage : this._backImage;
   }
 
   showCard(show: boolean = true) {
     this._image = show ? this._frontImage : this._backImage;
-    this._visible = show;
+    this._cardVisible = show;
   }
 
   draw(ctx: CanvasRenderingContext2D): void {

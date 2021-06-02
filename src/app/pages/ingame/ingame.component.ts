@@ -1,11 +1,9 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Board} from "../../engine/board";
 import {MainStep} from "../../steps/main";
-import {CreateGameStep} from "../../steps/createGame";
+import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
 import {InGameStep} from "../../steps/ingame";
-import {NetworkManager} from "../../engine/network/network.manager";
-import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-ingame',
@@ -35,7 +33,7 @@ export class IngameComponent implements OnInit {
       /* All Steps */
       this.board?.addSteps([
         mainStep,
-        new CreateGameStep(this.board as Board),
+        new WaitingRoomStep(this.board as Board),
         new JoinGameStep(this.board as Board),
         new InGameStep(this.board as Board)
       ]);

@@ -4,12 +4,13 @@ import {Entity} from "../engine/entity";
 import {Board} from "../engine/board";
 import {Player} from "../models/player";
 
-export class CreateGameStep extends GameStep {
-  name: string = "create_game";
+export class WaitingRoomStep extends GameStep {
+  name: string = "waitingroom";
 
   private background: HTMLImageElement;
   private images: HTMLImageElement[] = [];
-  private players: any[] = [];
+  private players: any[] = [null, null, null, null];
+  private imagesEntities: any[] = [null, null, null, null];
 
   constructor(board: Board) {
     super(board);
@@ -29,7 +30,8 @@ export class CreateGameStep extends GameStep {
     this.images.push(cardsP4);
   }
 
-  onEnter(): void {
+  onEnter(data: any): void {
+    console.log(data);
     let self = this;
 
     let background = new class extends Entity {
@@ -38,7 +40,9 @@ export class CreateGameStep extends GameStep {
     }(0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
 
     this.board.addEntity(background);
-    this.addPlayer("Player1");
+    for (let i = 0; i < data.players.length; i++) {
+      this.addPlayer(data.players[i].uid, "Player"+i);
+    }
     /*setTimeout(function() {
       self.board.networkManager.joinRoom(self.board.networkManager.roomuid).then(() => {
         console.log("Join again");
@@ -49,23 +53,39 @@ export class CreateGameStep extends GameStep {
   }
 
 
-  onNetworkMessage(msg: string) {
+  onNetworkMessage(msg: any) {
     //TODO
   }
 
-  onPlayerJoin(data: any) {
-    this.addPlayer("Player"+(this.players.length+1));
+  onPlayerJoin(msg: any) {
+    console.log("Player joined: ", msg);
+    this.addPlayer(msg.sender, "Player"+(this.players.length+1));
+  }
+
+  onPlayerLeave(msg: any) {
+    console.log("Player left: ", msg);
+    let index = this.players.findIndex(function(player: Player) {
+      return player && player.uid === msg.sender;
+    });
+    if (index > -1) {
+      this.board.removeEntity(this.imagesEntities[index]);
+      this.imagesEntities[index] = null;
+      this.players[index] = null;
+    }
   }
 
   onConnectionClosed() {
-    alert("Connection closed !");
+    alert("La connexion avec le serveur a été perdue.");
+    this.board.moveToStep("main");
   }
 
-  addPlayer(name: string) {
-    console.log("Adding new player");
+  addPlayer(uid:string, name: string) {
+    console.log("Adding new player: " + uid);
     let self = this;
-    this.players.push(new Player(this.players.length, name));
-    this.board.addEntity(new class extends Entity {
+    let index = this.players.indexOf(null);
+    console.log(index);
+    this.players[index] = new Player(uid, name);
+    let entity = new class extends Entity {
       private readonly image;
       constructor(x: number, y: number, width: number, height: number, image: HTMLImageElement) {
         super(x, y, width, height);
@@ -75,7 +95,9 @@ export class CreateGameStep extends GameStep {
         this.board?.ctx.drawImage(this.image, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
       }
       update(): void {}
-    }(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, self.images[self.players.length-1]))
+    }(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, self.images[index]);
+    this.imagesEntities[index] = entity;
+    this.board.addEntity(entity);
   }
 
   onLeave(): void {

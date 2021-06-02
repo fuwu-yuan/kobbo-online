@@ -4,45 +4,53 @@ import {Board} from "../board";
 import {NetworkRoom} from './network.room';
 import {NetworkResponse} from "./network.response";
 import { environment } from '../../../environments/environment';
-import {NetworkMessage} from "./network.message";
+import {SocketMessage} from "./socketMessage";
 
 export class NetworkManager {
 
   private http: HttpClient;
   private board: Board;
-
-  constructor(board: Board, http: HttpClient) {
-    this.http = http;
-    this.board = board;
-  }
-
+  private ws: WebSocketSubject<SocketMessage>|null = null;
   private static HEADER = new HttpHeaders({
     'Accept': 'application/json',
     'rejectUnauthorized': 'false',
   });
-
   public roomuid: string = "";
+
+  constructor(board: Board, http: HttpClient) {
+    this.http = http;
+    this.board = board;
+    this.checkPageReload();
+  }
 
   joinRoom(uid: string) {
     return new Promise<NetworkResponse>((resolve, reject) => {
       try {
-        const subject: WebSocketSubject<NetworkMessage> = webSocket(environment.wsUrl + uid);
-        subject.subscribe(
-          (msg: NetworkMessage) => {
-            console.log(msg);
+        this.ws = webSocket(environment.wsUrl + uid);
+        this.ws.subscribe(
+          (msg: SocketMessage) => {
             switch (msg.code) {
               case "player_join":
-                this.board.step.onPlayerJoin(msg.data);
+                this.board.step.onPlayerJoin(msg);
+                break;
+              case "player_leave":
+                this.board.step.onPlayerLeave(msg);
                 break;
               case "broadcast":
-                this.board.step.onNetworkMessage(msg.data);
+                this.board.step.onNetworkMessage(msg);
                 break;
               case "connected":
-                resolve({status:"success", code: "connected"});
+                resolve({status:"success", code: "connected", data: msg.data});
+                break;
+              case "room_full":
+                resolve({status:"error", code: "room_full", data: msg.data});
                 break;
             }
           },
           err => {
+            if (err instanceof CloseEvent) {
+              this.board.step.onConnectionClosed();
+            }
             console.log(err);
             reject();
           },
@@ -54,14 +62,15 @@ export class NetworkManager {
     });
   }
 
-  createRoom(name: string, autojoinroom = true): Promise<NetworkResponse> {
+  createRoom(name: string, limit = 0, autojoinroom = true): Promise<NetworkResponse> {
     console.log("Creating room " + name);
     let self = this;
     return new Promise<NetworkResponse>((resolve, reject) => {
       self.http.post<NetworkResponse>(`${environment.apiUrl}/room`, {
         game: self.board.name,
         version: self.board.version,
-        name: name
+        name: name,
+        limit: limit
       }, {headers: NetworkManager.HEADER})
         .subscribe(
           response => {
@@ -96,21 +105,33 @@ export class NetworkManager {
   }
 
   getOpenedRooms() {
-    return this.http.get<NetworkRoom[]>(`${environment.apiUrl}/room/${this.roomuid}`, {
+    return this.http.get<{status:string,servers:NetworkRoom[]}>(`${environment.apiUrl}/room`, {
       headers: NetworkManager.HEADER,
       params: {
-
+        "open": "true",
+        "game": this.board.name,
+        "version": this.board.version
       }
     });
   }
 
   getClosedRooms() {
-    let header = {
-      headers: new HttpHeaders({
-        'Accept': 'application/json',
-        'rejectUnauthorized': 'false',
-      })
-    };
-    return this.http.get<NetworkRoom[]>(`${environment.apiUrl}/room/data/${this.roomuid}`, header);
+    return this.http.get<{status:string,servers:NetworkRoom[]}>(`${environment.apiUrl}/room`, {
+      headers: NetworkManager.HEADER,
+      params: {
+        "open": "false",
+        "game": this.board.name,
+        "version": this.board.version
+      }
+    });
+  }
+
+  private checkPageReload() {
+    window.addEventListener("beforeunload", (event) => {
+      console.log("The page is refreshing");
+      if (this.ws) {
+        this.ws.unsubscribe();
+      }
+    });
   }
 }

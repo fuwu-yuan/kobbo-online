@@ -52,9 +52,13 @@ export class Board {
    */
   start() {
     this.step.onEnter({});
+    let lastUpdate = (new Date()).getTime();
     this.runningInterval = setInterval(() => {
-      this.update();
-      this.draw();
+      let now = (new Date()).getTime();
+      let delta = now - lastUpdate;
+      lastUpdate = now;
+      this.step.update(delta);
+      this.step.draw();
     }, 1000/this._config.game.FPS);
   }
 
@@ -178,6 +182,17 @@ export class Board {
   }
 
   /**
+   * Remove all the entities from board.
+   * The entities will disappear from the game
+   * @param entities
+   */
+  removeEntities(entities: Entity[]) {
+    for (let entity of entities) {
+      this.removeEntity(entity);
+    }
+  }
+
+  /**
    * Change the cursor
    * @param cursor
    */
@@ -248,6 +263,14 @@ export class Board {
     });
   }
 
+  get width() {
+    return this.config.board.size.width;
+  }
+
+  get height() {
+    return this.config.board.size.height;
+  }
+
   /**
    * Init all events from the board
    *
@@ -268,38 +291,5 @@ export class Board {
     this.canvas.addEventListener('mousemove', this.onMouseEvent.bind(this));
 
     //TODO keyboard events
-  }
-
-  /**
-   * Game update loop
-   */
-  update() {
-    //TODO ajouter le delta pour le update
-    // Update entities
-    let self = this;
-    if (this.canvas && this.ctx) {
-      this.entities.forEach(function(entity: Entity) {
-        entity.update();
-      });
-    }
-  }
-
-  /**
-   * Game draw loop
-   */
-  draw() {
-    let self = this;
-    if (this.canvas) {
-      /* Clear canvas */
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.clear();
-      this.entities.forEach(function(entity: Entity) {
-        self.resetStyles();
-        self.ctx.save();
-        self.ctx.translate(entity.translate.x, entity.translate.y);
-        entity.draw(self.ctx as CanvasRenderingContext2D);
-        self.ctx.restore();
-      });
-    }
   }
 }

@@ -26,19 +26,19 @@ export class MainStep extends GameStep {
       console.log("Creating game !");
       let name = prompt("Nom de la partie");
       if (name !== null) {
-        self.board.networkManager.createRoom(name, true)
+        self.board.networkManager.createRoom(name, 4)
           .then((res) => {
             console.log("Connecté et prêt !");
-            self.board.moveToStep("create_game");
+            self.board.moveToStep("waitingroom", res.data);
           })
           .catch((err) => {
-            alert(err.message);
+            console.error("Error: ", err);
           });
       }
     });
     joinButton.onMouseEvent("click", function(event: MouseEvent) {
       console.log("Joining Game !");
-      self.board.moveToStep("main");
+      self.board.moveToStep("joingame");
     });
 
     this.board.addEntity(createButton);

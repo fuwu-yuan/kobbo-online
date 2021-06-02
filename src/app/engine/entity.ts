@@ -7,13 +7,14 @@ import {Board} from "./board";
  *
  */
 export abstract class Entity {
-  private _translate: {x: number, y:number} = {x: 0, y:0};
-  private _x: number;
-  private _y: number;
-  private _width: number;
-  private _height: number;
-  private _dispatcher = new Dispatcher();
-  private _board: Board | null = null;
+  protected _translate: {x: number, y:number} = {x: 0, y:0};
+  protected _x: number;
+  protected _y: number;
+  protected _width: number;
+  protected _height: number;
+  protected _dispatcher = new Dispatcher();
+  protected _board: Board | null = null;
+  private _visible: boolean = true;
   public hovered: boolean = false;
 
   constructor(x: number, y: number, width: number, height: number) {
@@ -35,7 +36,7 @@ export abstract class Entity {
     return this._translate;
   }
 
-  set translate(translate) {
+  set translate(translate: {x: number, y: number}) {
     this._translate = translate;
   }
 
@@ -70,6 +71,14 @@ export abstract class Entity {
     this._width = value;
   }
 
+  get visible(): boolean {
+    return this._visible;
+  }
+
+  set visible(value: boolean) {
+    this._visible = value;
+  }
+
   get dispatcher() {
     return this._dispatcher;
   }
@@ -96,5 +105,5 @@ export abstract class Entity {
   }
 
   abstract draw(ctx: CanvasRenderingContext2D): void;
-  abstract update(): void;
+  abstract update(delta: number): void;
 }

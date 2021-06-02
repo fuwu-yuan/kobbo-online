@@ -2,18 +2,18 @@ import {Card} from "./card";
 
 export class Player {
 
-  private _id: number;
+  private _uid: string;
   private _cards: (Card|null)[] = [null, null, null, null];
   private _name: string;
 
-  constructor(id: number, name: string) {
-    this._id = id;
+  constructor(uid: string, name: string) {
+    this._uid = uid;
     this._cards = [];
     this._name = name;
   }
 
-  get id() {
-    return this._id
+  get uid() {
+    return this._uid
   }
 
   get cards() {
