@@ -12,15 +12,15 @@ import {InGameStep} from "../../steps/ingame";
 })
 export class IngameComponent implements OnInit {
 
+  private board;
+
   constructor(
-    private board: Board
   ) {
+    this.board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1");
   }
 
   ngOnInit(): void {
     /* Init and start board */
-    this.board.name = "Kobbo";
-    this.board.version = "0.0.1";
     this.initSteps();
     this.board.start();
   }

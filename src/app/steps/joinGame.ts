@@ -67,7 +67,7 @@ export class JoinGameStep extends GameStep {
     console.log("Updating game list...");
     if (this.loading) this.loading.visible = true;
     this.board.removeEntities(this.gameListLabel);
-    this.board.networkManager.getOpenedRooms().subscribe((response) => {
+    this.board.networkManager.getOpenedRooms().then((response) => {
       if (response.status === "success") {
         if (this.loading) this.loading.visible = false;
         this.serverList = response.servers;

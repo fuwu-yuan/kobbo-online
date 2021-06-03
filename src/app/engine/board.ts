@@ -1,16 +1,11 @@
-import {ElementRef, Injectable} from "@angular/core";
 import {Entity} from "./entity";
 import {GameStep} from "./gamestep";
 import {NetworkManager} from "./network/network.manager";
 import {BoardConfig} from "./config";
-import {HttpClient} from "@angular/common/http";
 
 /**
  * The borad is the main part of your Game
  */
-@Injectable({
-  providedIn: 'root'
-})
 export class Board {
   private _canvas: HTMLCanvasElement | undefined;
   entities: Entity[] = [];
@@ -25,10 +20,10 @@ export class Board {
   private _name: string;
   private _version: string;
 
-  constructor(private http: HttpClient) {
-    this._name = "My BGE-Web Game";
-    this._version = "0.0.1";
-    this._networkManager = new NetworkManager(this, http);
+  constructor(name: string, version: string) {
+    this._name = name;
+    this._version = version;
+    this._networkManager = new NetworkManager(this);
     this._config = new BoardConfig();
     this.canvas = this.createCanvasElem();
     this._ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;

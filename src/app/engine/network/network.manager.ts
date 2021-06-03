@@ -1,29 +1,32 @@
 import {webSocket, WebSocketSubject} from "rxjs/webSocket";
-import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {Board} from "../board";
 import {NetworkRoom} from './network.room';
 import {NetworkResponse} from "./network.response";
 import { environment } from '../../../environments/environment';
 import {SocketMessage} from "./socketMessage";
+import {AxiosResponse, default as axios} from 'axios';
 
 export class NetworkManager {
 
-  private http: HttpClient;
+  private api;
   private board: Board;
   private ws: WebSocketSubject<SocketMessage>|null = null;
-  private static HEADER = new HttpHeaders({
-    'Accept': 'application/json',
-    'rejectUnauthorized': 'false',
-  });
   public roomuid: string = "";
 
-  constructor(board: Board, http: HttpClient) {
-    this.http = http;
+  constructor(board: Board) {
     this.board = board;
     this.checkPageReload();
+    this.api = axios.create({
+      baseURL: environment.apiUrl,
+      timeout: 1000,
+      headers: {
+        'Accept': 'application/json',
+        'rejectUnauthorized': 'false',
+      }
+    });
   }
 
-  joinRoom(uid: string) {
+  joinRoom(uid: string): Promise<NetworkResponse> {
     return new Promise<NetworkResponse>((resolve, reject) => {
       try {
         this.ws = webSocket(environment.wsUrl + uid);
@@ -64,65 +67,62 @@ export class NetworkManager {
 
   createRoom(name: string, limit = 0, autojoinroom = true): Promise<NetworkResponse> {
     console.log("Creating room " + name);
-    let self = this;
-    return new Promise<NetworkResponse>((resolve, reject) => {
-      self.http.post<NetworkResponse>(`${environment.apiUrl}/room`, {
-        game: self.board.name,
-        version: self.board.version,
-        name: name,
-        limit: limit
-      }, {headers: NetworkManager.HEADER})
-        .subscribe(
-          response => {
-            this.roomuid = response.data.uid;
-            if (autojoinroom) {
-              self.joinRoom(response.data.uid).then(resolve).catch(reject);
-            }else {
-              resolve(response);
-            }
-          },
-          (error: HttpErrorResponse) => {
-            reject({ status: "error", code: "internal_error", message: error.message, data: error });
-          }
-        );
-    });
-  }
-
-  setRoomData(data: any) {
-    return this.http.post<any>(`${environment.apiUrl}/room/data/${this.roomuid}`, {
-      data: data
-    }, {headers: NetworkManager.HEADER});
-  }
-
-  closeRoom(uid: string, close: boolean = true) {
-    return this.http.post<any>(`${environment.apiUrl}/room/close/${this.roomuid}`, {
-      close: close
-    }, {headers: NetworkManager.HEADER});
-  }
-
-  openRoom(uid: string) {
-    this.closeRoom(uid, false);
-  }
-
-  getOpenedRooms() {
-    return this.http.get<{status:string,servers:NetworkRoom[]}>(`${environment.apiUrl}/room`, {
-      headers: NetworkManager.HEADER,
-      params: {
-        "open": "true",
-        "game": this.board.name,
-        "version": this.board.version
+    return this.api.post<any, AxiosResponse<NetworkResponse>>('/room', {
+      game: this.board.name,
+      version: this.board.version,
+      name: name,
+      limit: limit
+    }).then((response) => {
+      this.roomuid = response.data.data.uid;
+      if (autojoinroom) {
+        return this.joinRoom(this.roomuid);
+      }else {
+        return response.data;
       }
     });
   }
 
-  getClosedRooms() {
-    return this.http.get<{status:string,servers:NetworkRoom[]}>(`${environment.apiUrl}/room`, {
-      headers: NetworkManager.HEADER,
+  setRoomData(data: any): Promise<NetworkResponse> {
+    return this.api.post<any, AxiosResponse<NetworkResponse>>('/room/data/'+this.roomuid, {
+      data: data,
+    }).then(function(response) {
+      return response.data;
+    });
+  }
+
+  closeRoom(uid: string, close: boolean = true): Promise<NetworkResponse> {
+    return this.api.post<any, AxiosResponse<NetworkResponse>>('/room/close/'+this.roomuid, {
+      close: close,
+    }).then(function(response) {
+      return response.data;
+    });
+  }
+
+  openRoom(uid: string): Promise<NetworkResponse> {
+    return this.closeRoom(uid, false);
+  }
+
+  getOpenedRooms(): Promise<{status:string,servers:NetworkRoom[]}> {
+    return this.api.get<any, AxiosResponse<{status:string,servers:NetworkRoom[]}>>('/room', {
       params: {
-        "open": "false",
-        "game": this.board.name,
-        "version": this.board.version
+        open: true,
+        game: this.board.name,
+        version: this.board.version
       }
+    }).then(function(response) {
+      return response.data;
+    });
+  }
+
+  getClosedRooms(): Promise<{status:string,servers:NetworkRoom[]}> {
+    return this.api.get<any, AxiosResponse<{status:string,servers:NetworkRoom[]}>>('/room', {
+      params: {
+        open: false,
+        game: this.board.name,
+        version: this.board.version
+      }
+    }).then(function(response) {
+      return response.data;
     });
   }
 
