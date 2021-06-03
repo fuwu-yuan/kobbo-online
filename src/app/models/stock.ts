@@ -1,6 +1,4 @@
-import { Injectable } from '@angular/core';
-import {NGXLogger} from "ngx-logger";
-import { Card, Colors, Names, Powers, Values } from './card';
+import {Card, Colors, Names} from './card';
 
 export class Stock extends Array {
 

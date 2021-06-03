@@ -1,8 +1,5 @@
-import {GameStep} from "../engine/gamestep";
-import {Button} from "../models/button";
-import {Entity} from "../engine/entity";
-import {Board} from "../engine/board";
 import {Player} from "../models/player";
+import {Board, Entity, GameStep} from "@fuwu-yuan/bgew";
 
 export class WaitingRoomStep extends GameStep {
   name: string = "waitingroom";

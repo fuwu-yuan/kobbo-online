@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {Board} from "../../engine/board";
 import {MainStep} from "../../steps/main";
 import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
 import {InGameStep} from "../../steps/ingame";
+import {Board} from '@fuwu-yuan/bgew';
 
 @Component({
   selector: 'app-ingame',
@@ -14,8 +14,7 @@ export class IngameComponent implements OnInit {
 
   private board;
 
-  constructor(
-  ) {
+  constructor() {
     this.board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1");
   }
 

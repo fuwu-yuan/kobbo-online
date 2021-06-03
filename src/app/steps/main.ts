@@ -1,5 +1,4 @@
-import {GameStep} from "../engine/gamestep";
-import {Button} from "../models/button";
+import {Entities, GameStep} from "@fuwu-yuan/bgew";
 
 export class MainStep extends GameStep {
   name: string = "main";
@@ -8,14 +7,14 @@ export class MainStep extends GameStep {
     let self = this;
     let buttonsWidth = 200;
     let buttonHeight = 60;
-    let createButton = new Button(
+    let createButton = new Entities.Button(
       this.board.config.board.size.width / 4 - buttonsWidth / 2,
       this.board.config.board.size.height / 2 - buttonHeight / 2,
       buttonsWidth,
       buttonHeight,
       "Créer une partie"
     );
-    let joinButton = new Button(
+    let joinButton = new Entities.Button(
       this.board.config.board.size.width / 4 * 3 - buttonsWidth / 2,
       this.board.config.board.size.height / 2 - buttonHeight / 2,
       buttonsWidth,

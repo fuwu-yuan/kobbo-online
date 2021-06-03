@@ -1,10 +1,8 @@
-import {GameStep} from "../engine/gamestep";
 import {Player} from "../models/player";
 import {Card} from "../models/card";
-import {Entity} from "../engine/entity";
-import {Board} from "../engine/board";
 import {Stock} from "../models/stock";
 import {KobboConfig} from "../game/kobboConfig";
+import {Board, Entity, GameStep} from "@fuwu-yuan/bgew";
 
 export class InGameStep extends GameStep {
   name: string = "ingame";

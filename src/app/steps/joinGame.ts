@@ -1,20 +1,13 @@
-import {GameStep} from "../engine/gamestep";
-import {Button} from "../models/button";
-import {Entity} from "../engine/entity";
-import {Board} from "../engine/board";
-import {Label} from "../models/label";
-import {Square} from "../models/square";
-import {NetworkRoom} from "../engine/network/network.room";
-import {NetworkResponse} from "../engine/network/network.response";
+import {Board, Entities, Entity, GameStep, Network} from "@fuwu-yuan/bgew";
 
 export class JoinGameStep extends GameStep {
   name: string = "joingame";
 
   private background: HTMLImageElement;
   private serverCheckTimer = { current: 0, max: 10000 };
-  private serverList: NetworkRoom[] = [];
-  private loading: Label|null = null;
-  private gameListLabel: Label[] = [];
+  private serverList: Network.Room[] = [];
+  private loading: Entities.Label|null = null;
+  private gameListLabel: Entities.Label[] = [];
 
   constructor(board: Board) {
     super(board);
@@ -33,17 +26,17 @@ export class JoinGameStep extends GameStep {
     this.board.addEntity(background);
 
     /** Black overlay */
-    let overlay = new Square(0, 0, this.board.width, this.board.height, "rgba(0,0,0,0.5)", "rgba(0,0,0,0.5)");
+    let overlay = new Entities.Square(0, 0, this.board.width, this.board.height, "rgba(0,0,0,0.5)", "rgba(0,0,0,0.5)");
     this.board.addEntity(overlay);
 
     /** Title */
-    var title = new Label(0, 0, "Parties disponibles", this.board.ctx);
+    var title = new Entities.Label(0, 0, "Parties disponibles", this.board.ctx);
     title.fontSize = 40;
     title.x = this.board.width / 2 - title.width / 2;
     this.board.addEntity(title);
 
     /** Loading label */
-    this.loading = new Label(0, 0, "Rechargement des parties...", this.board.ctx);
+    this.loading = new Entities.Label(0, 0, "Rechargement des parties...", this.board.ctx);
     this.loading.fontSize = 12;
     this.loading.x = this.board.width - this.loading.width;
     this.loading.visible = false;
@@ -75,14 +68,14 @@ export class JoinGameStep extends GameStep {
         for (let i = 0; i < this.serverList.length; i++) {
           let room = this.serverList[i];
           console.log(room);
-          let line = new Label(0, 0, `[${room.players.length}/${room.limit}] ${room.game} - ${room.name}`, this.board.ctx);
+          let line = new Entities.Label(0, 0, `[${room.players.length}/${room.limit}] ${room.game} - ${room.name}`, this.board.ctx);
           line.translate = listPosition;
           line.y = (i+1)*40;
           line.hoverFontColor = "rgba(200, 200, 200, 1)";
           line.hoverCursor = "pointer";
           line.onMouseEvent("click", (e) => {
             console.log(room.uid + " clicked");
-            this.board.networkManager.joinRoom(room.uid).then((response: NetworkResponse) => {
+            this.board.networkManager.joinRoom(room.uid).then((response: Network.Response) => {
               if (response.status === "success") {
                 this.board.moveToStep("waitingroom", response.data);
               }else {

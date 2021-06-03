@@ -1,4 +1,4 @@
-import {Entity} from "../engine/entity";
+import {Entity} from "@fuwu-yuan/bgew";
 
 export class Card extends Entity {
 
