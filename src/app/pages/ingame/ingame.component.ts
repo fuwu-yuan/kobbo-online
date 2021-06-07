@@ -4,6 +4,8 @@ import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
 import {InGameStep} from "../../steps/ingame";
 import {Board} from '@fuwu-yuan/bgew';
+import {environment} from "../../../environments/environment";
+import {JulienGameServer} from "../../override/JulienGameServer";
 
 @Component({
   selector: 'app-ingame',
@@ -16,6 +18,9 @@ export class IngameComponent implements OnInit {
 
   constructor() {
     this.board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1");
+    //this.board.networkManager = new JulienGameServer(this.board);
+    this.board.networkManager.apiUrl = environment.apiUrl;
+    this.board.networkManager.wsUrl = environment.wsUrl;
   }
 
   ngOnInit(): void {
@@ -27,14 +32,14 @@ export class IngameComponent implements OnInit {
   initSteps() {
     /* Init steps */
     if (this.board) {
-      let mainStep = new MainStep(this.board as Board);
+      let mainStep = new MainStep(this.board);
       this.board.step = mainStep; // First shown step
       /* All Steps */
-      this.board?.addSteps([
+      this.board.addSteps([
         mainStep,
-        new WaitingRoomStep(this.board as Board),
-        new JoinGameStep(this.board as Board),
-        new InGameStep(this.board as Board)
+        new WaitingRoomStep(this.board),
+        new JoinGameStep(this.board),
+        new InGameStep(this.board)
       ]);
     }
   }

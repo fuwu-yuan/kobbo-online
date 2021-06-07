@@ -67,8 +67,8 @@ export class JoinGameStep extends GameStep {
         let listPosition = {x: this.board.width / 4, y: 100};
         for (let i = 0; i < this.serverList.length; i++) {
           let room = this.serverList[i];
-          console.log(room);
-          let line = new Entities.Label(0, 0, `[${room.players.length}/${room.limit}] ${room.game} - ${room.name}`, this.board.ctx);
+          console.log("Room found: ", room);
+          let line = new Entities.Label(0, 0, `[${room.clients.length}/${room.limit}] ${room.game} - ${room.name}`, this.board.ctx);
           line.translate = listPosition;
           line.y = (i+1)*40;
           line.hoverFontColor = "rgba(200, 200, 200, 1)";
@@ -77,7 +77,7 @@ export class JoinGameStep extends GameStep {
             console.log(room.uid + " clicked");
             this.board.networkManager.joinRoom(room.uid).then((response: Network.Response) => {
               if (response.status === "success") {
-                this.board.moveToStep("waitingroom", response.data);
+                this.board.moveToStep("waitingroom", Object.assign({}, response.data, { isHost: false }));
               }else {
                 if (response.code === "room_full") {
                   alert("Il n'y a plus de place dans cette partie.");

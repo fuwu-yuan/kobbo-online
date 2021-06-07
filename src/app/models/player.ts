@@ -1,27 +1,28 @@
 import {Card} from "./card";
 
 export class Player {
+  public index: number;
+  public uid: string;
+  public cards: (Card|null)[] = [null, null, null, null];
+  public name: string;
+  public isHost: boolean;
+  public ready: boolean;
 
-  private _uid: string;
-  private _cards: (Card|null)[] = [null, null, null, null];
-  private _name: string;
-
-  constructor(uid: string, name: string) {
-    this._uid = uid;
-    this._cards = [];
-    this._name = name;
+  constructor(index: number, uid: string, name: string) {
+    this.index = index;
+    this.uid = uid;
+    this.cards = [];
+    this.name = name;
+    this.isHost = false;
+    this.ready = false;
   }
 
-  get uid() {
-    return this._uid
-  }
-
-  get cards() {
-    return this._cards;
-  }
-
-  get name() {
-    return this._name;
+  static fromObject(obj: any): Player {
+    let keys = Object.keys(obj);
+    if (keys.indexOf("index") === -1 || keys.indexOf("uid") === -1 || keys.indexOf("name") === -1) {
+      throw new Error("Missing required keys: index, uid, name");
+    }
+    return Object.assign(new Player(0, "", ""), obj);
   }
 
   giveCard(card: Card|null, i: number|null = null) {

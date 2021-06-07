@@ -20,9 +20,11 @@
     "@angular/platform-browser-dynamic": "~11.0.5",
     "@angular/router": "~11.0.5",
     "axios": "^0.21.1",
+    "moniker": "^0.1.2",
     "ngx-logger": "^4.1.9",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
+    "unique-names-generator": "^4.5.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

@@ -3,12 +3,12 @@ import {Card} from "../models/card";
 import {Stock} from "../models/stock";
 import {KobboConfig} from "../game/kobboConfig";
 import {Board, Entity, GameStep} from "@fuwu-yuan/bgew";
+import {Kobbo} from "../game/Kobbo";
 
 export class InGameStep extends GameStep {
   name: string = "ingame";
 
   private stock: Stock;
-  private players: Player[] = [];
 
   constructor(board: Board) {
     super(board);
@@ -17,10 +17,10 @@ export class InGameStep extends GameStep {
 
   onEnter(data: any): void {
     console.log("Entering InGame");
-    this.players = data.players;
+    console.log(Kobbo.players);
     this.initGame();
-    this.initBoard();
-    this.startRound();
+    //this.initBoard();
+    this.deal();
   }
 
   onLeave(): void {
@@ -50,36 +50,35 @@ export class InGameStep extends GameStep {
     }
   }
 
-  startRound(): void {
+  deal(): void {
     let self = this;
-    let playerId = 0;
+    let playerIndex = 0;
     let cardId = 0;
     let interval = setInterval(function() {
       let card: Card = self.stock.draw();
-      self.giveCardToPlayer(playerId, card);
-      playerId++;
-      if (playerId === self.players.length) {
-        playerId = 0;
+      self.giveCardToPlayer(playerIndex, card);
+      playerIndex++;
+      if (playerIndex === Kobbo.players.length) {
+        playerIndex = 0;
         cardId++;
       }
-      if (playerId === 0 && cardId == 4) {
+      if (playerIndex === 0 && cardId == Kobbo.players.length) {
         clearInterval(interval)
       }
     }, 500);
   }
 
   giveCardToPlayer(i: number, card: Card) {
-    let self = this;
     let playerSpace = {
       width: this.board.config.board.size.width/2,
       height: this.board.config.board.size.height/2
     };
 
-    this.players[i].giveCard(card);
+    Kobbo.players[i].giveCard(card);
     card.width = KobboConfig.cards.size.width;
     card.height = KobboConfig.cards.size.height;
-    card.x = (playerSpace.width/2)-(playerSpace.width/4*(([1, 3].includes(self.players[i].cards.length) ? 1 : -1)))-card.width/2;
-    card.y = (playerSpace.height/2)-(playerSpace.height/4*((self.players[i].cards.length > 2 ? -1 : 1)))-card.height/2;
+    card.x = (playerSpace.width/2)-(playerSpace.width/4*(([1, 3].includes(Kobbo.players[i].cards.length) ? 1 : -1)))-card.width/2;
+    card.y = (playerSpace.height/2)-(playerSpace.height/4*((Kobbo.players[i].cards.length > 2 ? -1 : 1)))-card.height/2;
     card.translate = {
       x: (i%2) * (this.board.config.board.size.width / 2),
       y: (i > 1 ? 1 : 0) * (this.board.config.board.size.height / 2)
