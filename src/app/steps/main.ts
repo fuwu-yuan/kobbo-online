@@ -8,6 +8,8 @@ export class MainStep extends GameStep {
     let self = this;
     let buttonsWidth = 200;
     let buttonHeight = 60;
+
+    /** Create button */
     let createButton = new Entities.Button(
       this.board.config.board.size.width / 4 - buttonsWidth / 2,
       this.board.config.board.size.height / 2 - buttonHeight / 2,
@@ -16,14 +18,6 @@ export class MainStep extends GameStep {
       "Créer une partie"
     );
     createButton.hoverCursor = "pointer";
-    let joinButton = new Entities.Button(
-      this.board.config.board.size.width / 4 * 3 - buttonsWidth / 2,
-      this.board.config.board.size.height / 2 - buttonHeight / 2,
-      buttonsWidth,
-      buttonHeight,
-      "Rejoindre une partie"
-    );
-    joinButton.hoverCursor = "pointer";
     createButton.onMouseEvent("click", function(event: MouseEvent) {
       console.log("Creating game !");
       let defaultName: string = uniqueNamesGenerator({
@@ -44,6 +38,16 @@ export class MainStep extends GameStep {
           });
       }
     });
+
+    /** Join button */
+    let joinButton = new Entities.Button(
+      this.board.config.board.size.width / 4 * 3 - buttonsWidth / 2,
+      this.board.config.board.size.height / 2 - buttonHeight / 2,
+      buttonsWidth,
+      buttonHeight,
+      "Rejoindre une partie"
+    );
+    joinButton.hoverCursor = "pointer";
     joinButton.onMouseEvent("click", function(event: MouseEvent) {
       console.log("Joining Game !");
       self.board.moveToStep("joingame");

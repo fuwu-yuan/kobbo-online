@@ -1,4 +1,5 @@
 import {Entity} from "@fuwu-yuan/bgew";
+import {KobboConfig} from "../game/kobboConfig";
 
 export class Card extends Entity {
 
@@ -12,7 +13,7 @@ export class Card extends Entity {
   private _cardVisible: boolean;
 
   constructor(name: string, color: string) {
-    super(0, 0, 0, 0);
+    super(0, 0, KobboConfig.cards.size.width, KobboConfig.cards.size.height);
     this._name = name;
     this._color = color;
     this._cardVisible = false;

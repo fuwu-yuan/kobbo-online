@@ -6,6 +6,8 @@ import {InGameStep} from "../../steps/ingame";
 import {Board} from '@fuwu-yuan/bgew';
 import {environment} from "../../../environments/environment";
 import {JulienGameServer} from "../../override/JulienGameServer";
+import {Kobbo} from "../../game/Kobbo";
+import {Player} from "../../models/player";
 
 @Component({
   selector: 'app-ingame',
@@ -17,7 +19,7 @@ export class IngameComponent implements OnInit {
   private board;
 
   constructor() {
-    this.board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1");
+    this.board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1", 900, 900);
     //this.board.networkManager = new JulienGameServer(this.board);
     this.board.networkManager.apiUrl = environment.apiUrl;
     this.board.networkManager.wsUrl = environment.wsUrl;
@@ -27,6 +29,17 @@ export class IngameComponent implements OnInit {
     /* Init and start board */
     this.initSteps();
     this.board.start();
+
+    /* Test */
+    for (let i = 0; i < 4; i++) {
+      let player = new Player(i, "uid"+i, "Player"+i);
+      if (i === 0) {
+        player.isHost = true;
+      }
+      player.ready = true;
+      Kobbo.players.push(player);
+    }
+    this.board.moveToStep("ingame");
   }
 
   initSteps() {
