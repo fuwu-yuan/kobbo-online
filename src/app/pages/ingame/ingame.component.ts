@@ -12,23 +12,21 @@ import {Player} from "../../models/player";
 @Component({
   selector: 'app-ingame',
   templateUrl: './ingame.component.html',
-  styleUrls: ['./ingame.component.sass']
+  styleUrls: ['./ingame.component.scss']
 })
 export class IngameComponent implements OnInit {
 
-  private board;
-
   constructor() {
-    this.board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1", 900, 900);
-    //this.board.networkManager = new JulienGameServer(this.board);
-    this.board.networkManager.apiUrl = environment.apiUrl;
-    this.board.networkManager.wsUrl = environment.wsUrl;
   }
 
   ngOnInit(): void {
+    let board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1", 900, 900);
+    //this.board.networkManager = new JulienGameServer(this.board);
+    board.networkManager.apiUrl = environment.apiUrl;
+    board.networkManager.wsUrl = environment.wsUrl;
     /* Init and start board */
-    this.initSteps();
-    this.board.start();
+    this.initSteps(board);
+    board.start();
 
     /* Test */
     for (let i = 0; i < 4; i++) {
@@ -39,20 +37,21 @@ export class IngameComponent implements OnInit {
       player.ready = true;
       Kobbo.players.push(player);
     }
-    this.board.moveToStep("ingame");
+    Kobbo.player = Kobbo.players[0];
+    board.moveToStep("ingame");
   }
 
-  initSteps() {
+  initSteps(board: Board) {
     /* Init steps */
-    if (this.board) {
-      let mainStep = new MainStep(this.board);
-      this.board.step = mainStep; // First shown step
+    if (board) {
+      let mainStep = new MainStep(board);
+      board.step = mainStep; // First shown step
       /* All Steps */
-      this.board.addSteps([
+      board.addSteps([
         mainStep,
-        new WaitingRoomStep(this.board),
-        new JoinGameStep(this.board),
-        new InGameStep(this.board)
+        new WaitingRoomStep(board),
+        new JoinGameStep(board),
+        new InGameStep(board)
       ]);
     }
   }

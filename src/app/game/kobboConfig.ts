@@ -5,4 +5,7 @@ export class KobboConfig {
       height: 140
     }
   }
+  public static GAME_RULES: { MIN_VALUE_TO_WIN: number } = {
+    MIN_VALUE_TO_WIN : 5
+  }
 }

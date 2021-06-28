@@ -1,0 +1,75 @@
+:host ::ng-deep #game {
+  display: inline-block;
+}
+
+:host ::ng-deep #debug {
+  display: none;
+  width: 1300px;
+  height: 300px;
+  padding: 0 20px;
+  border: solid 1px darkgray;
+  box-sizing: border-box;
+  overflow: scroll;
+  &.show {
+    display: block;
+  }
+
+  h2 {
+    text-align: center;
+  }
+
+  .container {
+    display: inline-block;
+    margin-right: 10px;
+    padding-right: 10px;
+    margin-top: 10px;
+  }
+
+  .container:not(:last-child) {
+    border-right: solid 1px black;
+  }
+
+  .message.important {
+    font-weight: bold;
+  }
+
+  .message {
+    display: inline-block;
+  }
+
+  .title {
+    font-size: 18px;
+    color: #336699;
+    display: inline-block;
+    margin-right: 5px;
+  }
+}
+
+:host ::ng-deep #messages {
+  display: inline-block;
+  width: 400px;
+  height: 900px;
+  vertical-align: top;
+  padding: 0 20px;
+  border: solid 1px darkgray;
+  box-sizing: border-box;
+  overflow: scroll;
+
+  h2 {
+    text-align: center;
+  }
+
+  .message.important {
+    font-weight: bold;
+  }
+
+  .title {
+    font-size: 18px;
+    color: #336699;
+    margin-top: 10px;
+  }
+
+  .title.game {
+    color: brown;
+  }
+}
