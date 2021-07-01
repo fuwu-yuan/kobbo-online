@@ -27,18 +27,6 @@ export class IngameComponent implements OnInit {
     /* Init and start board */
     this.initSteps(board);
     board.start();
-
-    /* Test */
-    for (let i = 0; i < 4; i++) {
-      let player = new Player(i, "uid"+i, "Player"+i);
-      if (i === 0) {
-        player.isHost = true;
-      }
-      player.ready = true;
-      Kobbo.players.push(player);
-    }
-    Kobbo.player = Kobbo.players[0];
-    board.moveToStep("ingame");
   }
 
   initSteps(board: Board) {

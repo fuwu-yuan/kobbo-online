@@ -1,6 +1,6 @@
 import {Card, Colors, Names, Powers, PowersHelp} from "../models/card";
 import {Stock} from "../models/stock";
-import {Board, Entities, GameStep} from "@fuwu-yuan/bgew";
+import {Board, Entities, GameStep, Network} from "@fuwu-yuan/bgew";
 import {Kobbo} from "../game/Kobbo";
 import {create as randomseed, RandomSeed} from 'random-seed';
 import {Waste} from "../models/waste";
@@ -8,6 +8,7 @@ import {MessagesService} from "../services/messages.service";
 import {DebugService} from "../services/debug.service";
 import {Player} from "../models/player";
 import {KobboConfig} from "../game/kobboConfig";
+import {NetworkManager} from "@fuwu-yuan/bgew/dist/lib/engine/network";
 
 const DEBUG: boolean = false;
 const GAME_WILL_START_DURATION: number = 5; // seconds
@@ -52,6 +53,8 @@ export class InGameStep extends GameStep {
 
   async onEnter(data: any) {
     console.log("Entering InGame");
+    //this.test();return;
+    this.messagesService.show();
     console.log(Kobbo.players);
     this.initGame();
     this.initBoard();
@@ -60,11 +63,12 @@ export class InGameStep extends GameStep {
     await this.deal();
     await this.gameWillStart();
     this.createKobboButton();
-    this.changgeGameState(GameState.CURRENT_PLAYER_DRAW)
-    //this.test();
+
+    this.changeGameState(GameState.CURRENT_PLAYER_DRAW)
   }
 
-  changgeGameState(state: string) {
+  changeGameState(state: string) {
+    this.board.networkManager.sendMessage({"gamestate": state});
     this.gameState = state;
   }
 
@@ -149,7 +153,7 @@ export class InGameStep extends GameStep {
 
   endOfGame(player: Player) {
     if (player.space) {
-      this.changgeGameState(GameState.GAME_END);
+      this.changeGameState(GameState.GAME_END);
       let uid = this.messagesService.add("Kobbo", "Le jeu de " + player.name + " sera révélé dans "+END_GAME_REVEAL_TIME+" secondes", true);
       let i = 0;
 
@@ -189,13 +193,13 @@ export class InGameStep extends GameStep {
     let msgUid = this.messagesService.add("Kobbo", "La partie va commencer, vous avez " + GAME_WILL_START_DURATION + " secondes pour regarder vos 2 cartes du bas", true);
     let i = 0;
     return new Promise((resolve) => {
-      this.changgeGameState(GameState.GAME_WILL_START);
+      this.changeGameState(GameState.GAME_WILL_START);
       let counter = setInterval(() => {
         i++;
         this.messagesService.edit(msgUid, null, "La partie va commencer, vous avez " + (GAME_WILL_START_DURATION-i) + " seconde"+((GAME_WILL_START_DURATION-i) > 1 ? "s" : "")+" pour regarder vos 2 cartes du bas");
         if (i === GAME_WILL_START_DURATION) {
           clearInterval(counter);
-          this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+          this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
           for (const card of Kobbo.player.cards) {
             card?.showCard(false);
           }
@@ -221,15 +225,15 @@ export class InGameStep extends GameStep {
           this.gametable.removeEntity(this.drawnCard);
           this.sendToWaste(this.drawnCard);
           if (this.drawnCard.power !== null) {
-            this.changgeGameState(GameState.USE_POWER);
+            this.changeGameState(GameState.USE_POWER);
             // @ts-ignore
             this.messagesService.add("Kobbo", "Vous pouvez utiliser le pouvoir: " + PowersHelp[this.drawnCard.power], true);
           }else {
-            this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+            this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
           }
         }
       }else if (this.gameState === GameState.USE_POWER) {
-        this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+        this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
         this.messagesService.add("Kobbo", "Vous n'utilisez pas le pouvoir.", true);
       }
     });
@@ -262,7 +266,7 @@ export class InGameStep extends GameStep {
               setTimeout(() => {
                 this.drawnCard?.showCard(false)
               }, 2000);
-              this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+              this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
             }
 
             // USE POWER
@@ -271,10 +275,10 @@ export class InGameStep extends GameStep {
             // POWER : WATCH SELF
             if (this.drawnCard?.power === Powers.WATCH_SELF) {
               card.showCard(true);
-              this.changgeGameState(GameState.WAIT);
+              this.changeGameState(GameState.WAIT);
               setTimeout(() => {
                 card.showCard(false);
-                this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+                this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
               }, WATCH_CARD_DURATION * 1000);
 
               // POWER : BLIND SWITCH
@@ -287,7 +291,7 @@ export class InGameStep extends GameStep {
 
               // SWITCHING
               if (this.switchingCard !== null) {
-                this.changgeGameState(GameState.WAIT);
+                this.changeGameState(GameState.WAIT);
                 card.setBackGreen();
                 setTimeout(() => {
                   let self = card.owner;
@@ -306,7 +310,7 @@ export class InGameStep extends GameStep {
                     }
                     card.resetBack();
                     this.switchingCard = null;
-                    this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+                    this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
                   }, 1000);
                 }, 1000);
 
@@ -325,17 +329,17 @@ export class InGameStep extends GameStep {
 
             // POWER : WATCH OTHER
             if (this.drawnCard?.power === Powers.WATCH_OTHER) {
-              this.changgeGameState(GameState.WAIT);
+              this.changeGameState(GameState.WAIT);
               card.showCard(true);
               setTimeout(() => {
                 card.showCard(false);
-                this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+                this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
               }, WATCH_CARD_DURATION * 1000);
 
               // POWER : BLIND SWITCH
             } else if (this.drawnCard?.power === Powers.BLIND_SWITCH) {
               if (this.switchingCard !== null) {
-                this.changgeGameState(GameState.WAIT);
+                this.changeGameState(GameState.WAIT);
                 card.setBackRed();
                 setTimeout(() => {
                   let other = card.owner;
@@ -353,7 +357,7 @@ export class InGameStep extends GameStep {
                     }
                     card.resetBack();
                     this.switchingCard = null;
-                    this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+                    this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
                   }, 1000);
                 }, 1000);
               }else {
@@ -374,7 +378,7 @@ export class InGameStep extends GameStep {
               else {
                 card.showCard(false);
                 this.messagesService.add("Kobbo", "Vous n'avez pas échangé la carte", true);
-                this.changgeGameState(GameState.OTHER_PLAYER_PLAYING);
+                this.changeGameState(GameState.OTHER_PLAYER_PLAYING);
               }
             }
           }
@@ -383,7 +387,7 @@ export class InGameStep extends GameStep {
         }else if (card === this.stock.topCard()) {
           if (this.gameState === GameState.CURRENT_PLAYER_DRAW) {
             this.drawCard();
-            this.changgeGameState(GameState.CURRENT_PLAYER_DRAWN);
+            this.changeGameState(GameState.CURRENT_PLAYER_DRAWN);
           }
         }
       });
@@ -402,8 +406,15 @@ export class InGameStep extends GameStep {
       { x: spaceSize.width*2, y: spaceSize.height, deg: 270 }
     ];
 
+    if (Kobbo.players.length === 2) {
+      spacePos = [
+        { x: spaceSize.width, y: spaceSize.height*2, deg: 0 },
+        { x: spaceSize.width, y: 0, deg: 180 },
+      ];
+    }
+
     /* Add players */
-    for (const player of Kobbo.players) {
+    for (const player of Kobbo.sortedPlayers()) {
       let playerSpace = new Entities.Container(spacePos[player.index].x, spacePos[player.index].y, spaceSize.width, spaceSize.height);
       let background = new Entities.Square(0, 0, spaceSize.width, spaceSize.height, DEBUG ? ["red", "blue", "green", "black"][player.index] : "lightgray", "transparent");
       playerSpace.rotate = spacePos[player.index].deg;
@@ -419,6 +430,8 @@ export class InGameStep extends GameStep {
     this.centerSpace.y = spaceSize.height;
     let stockSpace = new Entities.Container(0, 0, this.centerSpace.width/2, this.centerSpace.height);
     let wasteSpace = new Entities.Container(this.centerSpace.width/2, 0, this.centerSpace.width/2, this.centerSpace.height);
+    let background = new Entities.Square(0, 0, spaceSize.width, spaceSize.height,  "lightgray", "transparent");
+    this.centerSpace.addEntity(background);
     this.centerSpace.addEntities([stockSpace, wasteSpace]);
     this.gametable.addEntity(this.centerSpace);
 
@@ -432,14 +445,14 @@ export class InGameStep extends GameStep {
     }
 
     /* Set table orientation */
-    this.gametable.rotate = (Kobbo.player.index) * -90;
+    this.gametable.rotate = spacePos[Kobbo.player.index].deg * -1;
     this.board.addEntity(this.gametable);
   }
 
   deal(): Promise<void> {
     this.messagesService.add("Kobbo", "Distribution des cartes", true);
     return new Promise((resolve) => {
-      this.changgeGameState(GameState.DEALING);
+      this.changeGameState(GameState.DEALING);
       let playerIndex = 0;
       let cardId = 0;
       let interval = setInterval(() => {
@@ -451,7 +464,7 @@ export class InGameStep extends GameStep {
             playerIndex = 0;
             cardId++;
           }
-          if (playerIndex === 0 && cardId == Kobbo.players.length) {
+          if (playerIndex === 0 && cardId == 4) {
             clearInterval(interval);
             resolve();
           }
@@ -503,6 +516,26 @@ export class InGameStep extends GameStep {
       this.debugService.set("CardPower", (this.drawnCard ? this.drawnCard.power : "none"), "cardpower");
       this.debugService.set("SwitchingCard", (this.switchingCard ? this.switchingCard.name : "none"), "switchingcard");
     }
+  }
+
+
+  onNetworkMessage(msg: Network.SocketMessage) {
+    console.log(msg);
+  }
+
+
+  onPlayerLeave(msg: Network.SocketMessage) {
+    let player = Kobbo.findPlayerByUid(msg.sender);
+    if (player) {
+      if (player.space) {
+        this.gametable.removeEntity(player.space);
+      }
+      Kobbo.removePlayer(player);
+    }
+  }
+
+  onConnectionClosed() {
+    alert("La conenxion a été perdue.");
   }
 }
 

@@ -21,6 +21,12 @@ export class MessagesService {
     }
   }
 
+  show() {
+    if (this.messagesElem) {
+      this.messagesElem.className = this.messagesElem?.className + " show";
+    }
+  }
+
   /**
    *
    * @param title Message title (will be displayed as [title])

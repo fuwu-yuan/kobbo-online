@@ -5,7 +5,6 @@ export class MainStep extends GameStep {
   name: string = "main";
 
   onEnter(): void {
-    let self = this;
     let buttonsWidth = 200;
     let buttonHeight = 60;
 
@@ -17,8 +16,18 @@ export class MainStep extends GameStep {
       buttonHeight,
       "Créer une partie"
     );
+    // Normal
+    createButton.strokeColor = "rgba(230,77,59, 1.0)";
+    createButton.fontColor = "rgba(230,77,59, 1.0)";
+    // Hover
+    createButton.hoverFillColor = "rgba(230,77,59, 1.0)";
+    createButton.hoverFontColor = "white";
     createButton.hoverCursor = "pointer";
-    createButton.onMouseEvent("click", function(event: MouseEvent) {
+    // Clicked
+    createButton.clickStrokeColor = "rgba(230,37,39, 1.0)";
+    createButton.clickFillColor = "rgba(230,37,39, 1.0)";
+    createButton.clickFontColor = "white";
+    createButton.onMouseEvent("click", (event: MouseEvent) => {
       console.log("Creating game !");
       let defaultName: string = uniqueNamesGenerator({
         dictionaries: [adjectives, colors, animals],
@@ -28,10 +37,10 @@ export class MainStep extends GameStep {
       defaultName = defaultName[0].toUpperCase() + defaultName.slice(1);
       let name = prompt("Nom de la partie", defaultName);
       if (name !== null) {
-        self.board.networkManager.createRoom(name, 4, true)
+        this.board.networkManager.createRoom(name, 4, true)
           .then((res) => {
             console.log("Connecté et prêt !");
-            self.board.moveToStep("waitingroom", Object.assign({}, res.data, { isHost: true }));
+            this.board.moveToStep("waitingroom", Object.assign({}, res.data, { isHost: true }));
           })
           .catch((err) => {
             console.error("Error: ", err);
@@ -47,10 +56,20 @@ export class MainStep extends GameStep {
       buttonHeight,
       "Rejoindre une partie"
     );
+    // Normal
+    joinButton.strokeColor = "rgba(230,77,59, 1.0)";
+    joinButton.fontColor = "rgba(230,77,59, 1.0)";
+    // Hover
+    joinButton.hoverFillColor = "rgba(230,77,59, 1.0)";
+    joinButton.hoverFontColor = "white";
     joinButton.hoverCursor = "pointer";
-    joinButton.onMouseEvent("click", function(event: MouseEvent) {
+    // Clicked
+    joinButton.clickStrokeColor = "rgba(230,37,39, 1.0)";
+    joinButton.clickFillColor = "rgba(230,37,39, 1.0)";
+    joinButton.clickFontColor = "white";
+    joinButton.onMouseEvent("click", (event: MouseEvent) => {
       console.log("Joining Game !");
-      self.board.moveToStep("joingame");
+      this.board.moveToStep("joingame");
     });
 
     this.board.addEntity(createButton);

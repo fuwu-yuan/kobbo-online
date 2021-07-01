@@ -86,6 +86,7 @@ export class JoinGameStep extends GameStep {
               }
             });
           })
+          console.log(line);
           this.gameListLabel.push(line);
           this.board.addEntity(line);
         }
