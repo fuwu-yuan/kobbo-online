@@ -4,15 +4,19 @@ import {Entities} from "@fuwu-yuan/bgew";
 
 export class Stock extends Array<Card> {
 
-  public seed: string;
   public space: Entities.Container|null = null;
 
   constructor() {
     super();
-    this.seed = uuidv4();
   }
 
-  initStock() {
+  /**
+   *
+   * Init stock
+   *
+   * @param randomFct An optional custom random function for shuffle. May return number between 0 and 1
+   */
+  initStock(randomFct: () => number = Math.random) {
     for (const [key, color] of Object.entries(Colors)) {
       for (const [key, name] of Object.entries(Names)) {
         let card = new Card(name, color);
@@ -20,15 +24,15 @@ export class Stock extends Array<Card> {
         this.push(card);
       }
     }
-    this.shuffle();
+    this.shuffle(randomFct);
   }
 
   topCard(): Card {
     return this[0];
   }
 
-  shuffle() {
-    return this.sort((a, b) => 0.5 - Math.random());
+  shuffle(randomFct: () => number = Math.random) {
+    return this.sort((a, b) => 0.5 - randomFct());
   }
 
   draw() {

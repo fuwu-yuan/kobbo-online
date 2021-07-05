@@ -1,7 +1,6 @@
-import {Entity, Entities} from "@fuwu-yuan/bgew";
+import {Entities} from "@fuwu-yuan/bgew";
 import {KobboConfig} from "../game/kobboConfig";
 import {Player} from "./player";
-import {Kobbo} from "../game/Kobbo";
 import {Stock} from "./stock";
 
 export class Card extends Entities.Square {
@@ -13,6 +12,7 @@ export class Card extends Entities.Square {
   private _backImage: HTMLImageElement;
   private _backGreenImage: HTMLImageElement;
   private _backRedImage: HTMLImageElement;
+  private _lockedImage: HTMLImageElement;
   private _name: any;
   private _color: string;
   private _cardVisible: boolean;
@@ -32,6 +32,7 @@ export class Card extends Entities.Square {
     this._backImage = new Image();
     this._backGreenImage = new Image();
     this._backRedImage = new Image();
+    this._lockedImage = new Image();
     this._image = this.loadImages();
   }
 
@@ -136,6 +137,7 @@ export class Card extends Entities.Square {
     this._backImage.src = "./assets/images/cards/cardBack_blue5.png";
     this._backGreenImage.src = "./assets/images/cards/cardBack_green5.png";
     this._backRedImage.src = "./assets/images/cards/cardBack_red5.png";
+    this._lockedImage.src = "./assets/images/cards/cardLocked.png";
 
     return this.cardVisible ? this._frontImage : this._backImage;
   }
@@ -152,8 +154,12 @@ export class Card extends Entities.Square {
     this._image = this._backImage;
   }
 
-  showCard(show: boolean = true) {
-    this._image = show ? this._frontImage : this._backImage;
+  showCard(show: boolean = true, sensored: boolean = false) {
+    if (sensored) {
+      this._image = show ? this._lockedImage : this._backImage;
+    }else {
+      this._image = show ? this._frontImage : this._backImage;
+    }
     this._cardVisible = show;
   }
 

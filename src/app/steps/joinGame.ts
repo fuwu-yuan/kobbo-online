@@ -8,6 +8,7 @@ export class JoinGameStep extends GameStep {
   private serverList: Network.Room[] = [];
   private loading: Entities.Label|null = null;
   private gameListLabel: Entities.Label[] = [];
+  private nickname = "";
 
   constructor(board: Board) {
     super(board);
@@ -15,8 +16,15 @@ export class JoinGameStep extends GameStep {
     this.background.src = "./assets/images/creategame/background.jpg";
   }
 
-  onEnter(): void {
+  onEnter(data: any): void {
     let self = this;
+
+    this.nickname = data.nickname;
+
+    this.serverCheckTimer = { current: 0, max: 10000 };
+    this.serverList = [];
+    this.loading = null;
+    this.gameListLabel = [];
 
     /** Background */
     let background = new class extends Entity {
@@ -68,7 +76,7 @@ export class JoinGameStep extends GameStep {
         for (let i = 0; i < this.serverList.length; i++) {
           let room = this.serverList[i];
           console.log("Room found: ", room);
-          let line = new Entities.Label(0, 0, `[${room.clients.length}/${room.limit}] ${room.game} - ${room.name}`, this.board.ctx);
+          let line = new Entities.Label(0, 0, `[${room.clients.length}/${room.limit}] ${room.name}`, this.board.ctx);
           line.translate = listPosition;
           line.y = (i+1)*40;
           line.hoverFontColor = "rgba(200, 200, 200, 1)";
@@ -77,7 +85,7 @@ export class JoinGameStep extends GameStep {
             console.log(room.uid + " clicked");
             this.board.networkManager.joinRoom(room.uid).then((response: Network.Response) => {
               if (response.status === "success") {
-                this.board.moveToStep("waitingroom", Object.assign({}, response.data, { isHost: false }));
+                this.board.moveToStep("waitingroom", Object.assign({}, response.data, { isHost: false, nickname: this.nickname }));
               }else {
                 if (response.code === "room_full") {
                   alert("Il n'y a plus de place dans cette partie.");

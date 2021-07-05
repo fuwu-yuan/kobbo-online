@@ -24,4 +24,12 @@ export class JulienGameServer extends AbstractNetworkManager{
   setRoomData(data: any): Promise<Network.Response> {
     return Promise.resolve({status: "error", code: "not_implemented"});
   }
+
+  getRoomData(): Promise<Network.Response> {
+    return Promise.resolve({status: "error", code: "not_implemented"});
+  }
+
+  ping(): Promise<string> {
+    return Promise.resolve("not_implemented");
+  }
 }

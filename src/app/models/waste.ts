@@ -4,19 +4,14 @@ import {Entities} from "@fuwu-yuan/bgew";
 
 export class Waste extends Array<Card> {
 
-  public seed: string;
   public space: Entities.Container|null = null;
 
   constructor() {
     super();
-    this.seed = uuidv4();
   }
 
-  shuffle() {
-    return this.sort((a, b) => 0.5 - Math.random());
+  topCard(): Card {
+    return this[this.length-1];
   }
 
-  draw() {
-    return this.shift();
-  }
 }

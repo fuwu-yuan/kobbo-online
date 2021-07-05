@@ -1,6 +1,5 @@
 import {Card} from "./card";
 import {Entities} from "@fuwu-yuan/bgew";
-import {Kobbo} from "../game/Kobbo";
 
 export class Player {
   public index: number;
@@ -35,19 +34,19 @@ export class Player {
       const UP = 0;
       const DOWN = playerSpace.height-card.height;
       const LEFT = 0;
-      const RIGHT = playerSpace.width-card.width;
+      const RIGHT = playerSpace.width/2-card.width;
 
       let positions = [
         {y: DOWN, x: LEFT},
         {y: DOWN, x: RIGHT},
         {y: UP, x: LEFT},
         {y: UP, x: RIGHT},
-        {y: DOWN, x: RIGHT*2},
-        {y: UP, x: RIGHT*2},
-        {y: DOWN, x: RIGHT*3},
-        {y: UP, x: RIGHT*3},
-        {y: DOWN, x: RIGHT*4},
-        {y: UP, x: RIGHT*4}
+        {y: DOWN, x: RIGHT+card.width},
+        {y: UP, x: RIGHT+card.width},
+        {y: DOWN, x: RIGHT+card.width*2},
+        {y: UP, x: RIGHT+card.width*2},
+        {y: DOWN, x: RIGHT+card.width*3},
+        {y: UP, x: RIGHT+card.width*3}
       ];
 
       let p;
@@ -87,7 +86,15 @@ export class Player {
     return i;
   }
 
+  findCardIndex(card: Card): number {
+    return this.cards.indexOf(card);
+  }
+
   getCardAt(i: number): Card|null {
     return this.cards[i];
+  }
+
+  __toString(): string {
+    return this.uid;
   }
 }

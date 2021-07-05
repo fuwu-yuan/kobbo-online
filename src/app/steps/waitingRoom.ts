@@ -11,31 +11,33 @@ export class WaitingRoomStep extends GameStep {
 
   private startButton: Entities.Button|null = null;
   private readyButton: Entities.Button|null = null;
-  private readyPlayersLabel: Entities.Label;
+  private readyPlayersLabel: Entities.Label|null = null;
+
+  private data: any;
 
   constructor(board: Board) {
     super(board);
     this.background = new Image();
     this.background.src = "./assets/images/creategame/background.jpg";
     let cardsP1 = new Image();
-    cardsP1.src = "/assets/images/creategame/p1.png";
+    //cardsP1.src = "/assets/images/creategame/p1.png";
     this.images.push(cardsP1);
     let cardsP2 = new Image();
-    cardsP2.src = "/assets/images/creategame/p2.png";
+    //cardsP2.src = "/assets/images/creategame/p2.png";
     this.images.push(cardsP2);
     let cardsP3 = new Image();
-    cardsP3.src = "/assets/images/creategame/p3.png";
+    //cardsP3.src = "/assets/images/creategame/p3.png";
     this.images.push(cardsP3);
     let cardsP4 = new Image();
-    cardsP4.src = "/assets/images/creategame/p4.png";
+    //cardsP4.src = "/assets/images/creategame/p4.png";
     this.images.push(cardsP4);
-
-    this.readyPlayersLabel = new Entities.Label(10, 10, "", board.ctx);
   }
 
   onEnter(data: any): void {
+    this.readyPlayersLabel = new Entities.Label(10, 10, "", this.board.ctx);
     console.log("Enter: ", data);
-    let self = this;
+    this.data = data;
+    const self = this;
 
     /** Add background */
     let background = new class extends Entity {
@@ -54,16 +56,22 @@ export class WaitingRoomStep extends GameStep {
 
     /** Create player locally */
     let index = this.getFreeIndex();
-    let player = new Player(index, data.uid, "Player " + (index+1));
+    let player = new Player(index, data.uid, data.nickname);
     Kobbo.player = this.addPlayer(player);
     Kobbo.player.isHost = data.isHost;
     Kobbo.player.ready = data.isHost;
 
     /** Add player to server data and update player list */
-    this.board.networkManager.setRoomData({players: [JSON.parse(JSON.stringify(Kobbo.player))]}, true);
+    this.board.networkManager.setRoomData({players: [JSON.parse(JSON.stringify(Kobbo.player))]}, true)
+      .then((response: Network.Response) => {
+        this.data = response.data;
+      });
 
     /** Add control buttons */
     this.addControlButtons();
+
+    /** Send nickname to other players */
+    this.board.networkManager.sendMessage({nickname: data.nickname});
   }
 
   addControlButtons() {
@@ -88,7 +96,7 @@ export class WaitingRoomStep extends GameStep {
       this.startButton.disabled = true;
       this.startButton.onMouseEvent("click", (event: MouseEvent) => {
         this.board.networkManager.sendMessage({start: true}).then(() => {
-          this.board.moveToStep("ingame");
+          this.board.moveToStep("ingame", this.data);
         });
       });
       this.board.addEntity(this.startButton);
@@ -123,6 +131,9 @@ export class WaitingRoomStep extends GameStep {
         player.ready = message.data.msg.ready;
         console.log("Player " + message.sender + " is " + (player.ready ? "" : "NOT ") + "ready");
         if (Kobbo.player.isHost) {
+          this.board.networkManager.setRoomData({players: Kobbo.players}, false).then((response: Network.Response) => {
+            this.data = response.data;
+          });
           let readyPlayers = Kobbo.players.filter((p) => {
             return p && p.ready;
           });
@@ -141,10 +152,18 @@ export class WaitingRoomStep extends GameStep {
       }
     }
 
+    /* Nickname */
+    if ("nickname" in message.data.msg) {
+      let player = Kobbo.findPlayerByUid(message.sender);
+      if (player) {
+        player.name = message.data.msg.nickname;
+      }
+    }
+
     /* Game start */
     if ("start" in message.data.msg) {
       if (message.data.msg.start) {
-        this.board.moveToStep("ingame");
+        this.board.moveToStep("ingame", this.data);
       }
     }
   }
@@ -170,7 +189,9 @@ export class WaitingRoomStep extends GameStep {
       Kobbo.players.splice(index, 1);
       console.log(Kobbo.player.isHost);
       if (Kobbo.player.isHost) {
-        this.board.networkManager.setRoomData({players: Kobbo.players}, false);
+        this.board.networkManager.setRoomData({players: Kobbo.players}, false).then((response: Network.Response) => {
+          this.data = response.data;
+        });
       }
     }
   }
@@ -210,12 +231,14 @@ export class WaitingRoomStep extends GameStep {
   }
 
   private updatePlayersReadyLabel() {
-    this.readyPlayersLabel.text = "";
-    let players = Kobbo.players.sort((p1: Player, p2: Player) => {
-      return p1.index - p2.index;
-    })
-    for (let i = 0; i < players.length; i++) {
-      this.readyPlayersLabel.text = this.readyPlayersLabel.text + (players[i].ready ? "✅ " : "❌ ") + players[i].name + "\n";
+    if (this.readyPlayersLabel) {
+      this.readyPlayersLabel.text = "";
+      let players = Kobbo.players.sort((p1: Player, p2: Player) => {
+        return p1.index - p2.index;
+      })
+      for (let i = 0; i < players.length; i++) {
+        this.readyPlayersLabel.text = this.readyPlayersLabel.text + (players[i].ready ? "✅ " : "❌ ") + players[i].name + "\n";
+      }
     }
   }
 
