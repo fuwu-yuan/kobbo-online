@@ -27,6 +27,14 @@ export class MessagesService {
     }
   }
 
+  hide() {
+    if (this.messagesElem) {
+      let classes = this.messagesElem.classList;
+      classes.remove("show");
+      this.messagesElem.className = classes.value;
+    }
+  }
+
   /**
    *
    * @param title Message title (will be displayed as [title])

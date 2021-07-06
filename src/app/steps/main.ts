@@ -15,30 +15,32 @@ export class MainStep extends GameStep {
   constructor(board: Board) {
     super(board);
 
-    let buttonsWidth = 200;
-    let buttonHeight = 60;
-
     /** Online Label */
     this.onlineLabel = new Entities.Label(board.width - 70, 10, "", board.ctx);
     this.onlineLabel.fontSize = 14;
 
+    let buttonSize = {width: 200, height: 60};
     /** Create Button */
-    this.createButton = new Entities.Button(
-      this.board.config.board.size.width / 4 - buttonsWidth / 2,
-      this.board.config.board.size.height / 2 - buttonHeight / 2,
-      buttonsWidth,
-      buttonHeight,
+    this.createButton = new Button(
+      this.board.config.board.size.width / 4 - buttonSize.width / 2,
+      this.board.config.board.size.height / 2 - buttonSize.height / 2,
+      buttonSize.width,
+      buttonSize.height,
       "Créer une partie"
     );
+    this.createButton.onMouseEvent("click", this.createGame.bind(this));
+
     /** Join Button */
-    this.joinButton = new Entities.Button(
-      this.board.config.board.size.width / 4 * 3 - buttonsWidth / 2,
-      this.board.config.board.size.height / 2 - buttonHeight / 2,
-      buttonsWidth,
-      buttonHeight,
+    this.joinButton = new Button(
+      this.board.config.board.size.width / 4 * 3 - buttonSize.width / 2,
+      this.board.config.board.size.height / 2 - buttonSize.height / 2,
+      buttonSize.width,
+      buttonSize.height,
       "Rejoindre une partie"
     );
+    this.joinButton.onMouseEvent("click", this.joinGame.bind(this));
 
+    /** Nickname */
     this.nicknameinput = new Entities.InputText(0, 0, 200, 50);
   }
 
@@ -47,63 +49,6 @@ export class MainStep extends GameStep {
 
     Kobbo.players = [];
     Kobbo.playerIndex = -1;
-
-    /** Create button */
-    // Normal
-    this.createButton.strokeColor = "rgba(230,77,59, 1.0)";
-    this.createButton.fontColor = "rgba(230,77,59, 1.0)";
-    // Hover
-    this.createButton.hoverFillColor = "rgba(230,77,59, 1.0)";
-    this.createButton.hoverFontColor = "white";
-    this.createButton.hoverCursor = "pointer";
-    // Clicked
-    this.createButton.clickStrokeColor = "rgba(230,37,39, 1.0)";
-    this.createButton.clickFillColor = "rgba(230,37,39, 1.0)";
-    this.createButton.clickFontColor = "white";
-    // Disabled
-    this.createButton.disabledStrokeColor = "darkgray";
-    this.createButton.disabledFontColor = "darkgray";
-    this.createButton.onMouseEvent("click", (event: MouseEvent) => {
-      console.log("Creating game !");
-      let defaultName: string = uniqueNamesGenerator({
-        dictionaries: [adjectives, colors, animals],
-        separator: ' ',
-        length: 3,
-      });
-      defaultName = defaultName[0].toUpperCase() + defaultName.slice(1);
-      let name = prompt("Nom de la partie", defaultName);
-      if (name !== null) {
-        let seed = uuidv4();
-        this.board.networkManager.createRoom(name, 4, {seed: seed}, true)
-          .then((res) => {
-            console.log("Connecté et prêt !");
-            this.board.moveToStep("waitingroom", Object.assign({}, res.data, { isHost: true, "nickname": this.nicknameinput.text }));
-          })
-          .catch((err) => {
-            console.error("Error: ", err);
-          });
-      }
-    });
-
-    /** Join button */
-    // Normal
-    this.joinButton.strokeColor = "rgba(230,77,59, 1.0)";
-    this.joinButton.fontColor = "rgba(230,77,59, 1.0)";
-    // Hover
-    this.joinButton.hoverFillColor = "rgba(230,77,59, 1.0)";
-    this.joinButton.hoverFontColor = "white";
-    this.joinButton.hoverCursor = "pointer";
-    // Clicked
-    this.joinButton.clickStrokeColor = "rgba(230,37,39, 1.0)";
-    this.joinButton.clickFillColor = "rgba(230,37,39, 1.0)";
-    this.joinButton.clickFontColor = "white";
-    // Disabled
-    this.joinButton.disabledStrokeColor = "darkgray";
-    this.joinButton.disabledFontColor = "darkgray";
-    this.joinButton.onMouseEvent("click", (event: MouseEvent) => {
-      console.log("Joining Game !");
-      this.board.moveToStep("joingame", {nickname: this.nicknameinput.text});
-    });
 
     let onlineLabelPrefix = new Entities.Label(this.board.width - 165, 10, "Le serveur est ", this.board.ctx);
     onlineLabelPrefix.fontColor = "black";
@@ -133,6 +78,33 @@ export class MainStep extends GameStep {
     this.board.addEntity(this.joinButton);
     this.board.addEntity(onlineLabelPrefix);
     this.board.addEntity(this.onlineLabel);
+  }
+
+  createGame() {
+    console.log("Creating game !");
+    let defaultName: string = uniqueNamesGenerator({
+      dictionaries: [adjectives, colors, animals],
+      separator: ' ',
+      length: 3,
+    });
+    defaultName = defaultName[0].toUpperCase() + defaultName.slice(1);
+    let name = prompt("Nom de la partie", defaultName);
+    if (name !== null) {
+      let seed = uuidv4();
+      this.board.networkManager.createRoom(name, 4, {seed: seed}, true)
+        .then((res) => {
+          console.log("Connecté et prêt !");
+          this.board.moveToStep("waitingroom", Object.assign({}, res.data, { isHost: true, "nickname": this.nicknameinput.text }));
+        })
+        .catch((err) => {
+          console.error("Error: ", err);
+        });
+    }
+  }
+
+  joinGame() {
+    console.log("Joining Game !");
+    this.board.moveToStep("joingame", {nickname: this.nicknameinput.text});
   }
 
   onLeave(): void {
@@ -173,5 +145,25 @@ export class MainStep extends GameStep {
     }).catch(() => {
       this.offline();
     })
+  }
+}
+
+class Button extends Entities.Button {
+  constructor(x: number, y: number, width: number, height: number, text: string = "") {
+    super(x, y, width, height, text);
+    // Normal
+    this.strokeColor = "rgba(230,77,59, 1.0)";
+    this.fontColor = "rgba(230,77,59, 1.0)";
+    // Hover
+    this.hoverFillColor = "rgba(230,77,59, 1.0)";
+    this.hoverFontColor = "white";
+    this.hoverCursor = "pointer";
+    // Clicked
+    this.clickStrokeColor = "rgba(230,37,39, 1.0)";
+    this.clickFillColor = "rgba(230,37,39, 1.0)";
+    this.clickFontColor = "white";
+    // Disabled
+    this.disabledStrokeColor = "darkgray";
+    this.disabledFontColor = "darkgray";
   }
 }

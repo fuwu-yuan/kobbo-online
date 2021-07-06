@@ -55,14 +55,22 @@ export class InGameStep extends GameStep {
     this.randomseed = randomseed();
     this.gametable = new Entities.Container(0, 0, board.width, board.height);
     this.centerSpace = new Entities.Container(0, 0, 0, 0);
-    this.FPSLabel = new Entities.Label(this.board.width - 100, 10, "FPS: -", this.board.ctx);
+    this.FPSLabel = new Entities.Label(this.board.width - 60, 10, "FPS: -", this.board.ctx);
+    this.FPSLabel.fontSize = 14;
     this.FPSLabel.fontColor = "black";
+    this.FPSLabel.visible = false;
     this.board.debug.skeleton = DEBUG;
     this.messagesService = MessagesService.getInstance();
     this.debugService = DebugService.getInstance();
     if (DEBUG) {
       this.debugService.show();
+      this.FPSLabel.visible = true;
     }
+    this.board.onKeyboardEvent("keydown", (event: KeyboardEvent) => {
+      if (event.key === "f" && event.ctrlKey) {
+        this.FPSLabel.visible = !this.FPSLabel.visible;
+      }
+    })
   }
 
   async onEnter(data: any) {
@@ -87,6 +95,11 @@ export class InGameStep extends GameStep {
         this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
       });
     }
+  }
+
+  onLeave(): void {
+    this.messagesService.clear();
+    this.messagesService.show;
   }
 
   changeGameState(state: string) {
@@ -198,12 +211,12 @@ export class InGameStep extends GameStep {
       let i = 0;
 
       let failLabel = new Entities.Label(0, 0, "PERDU", this.board.ctx);
-      failLabel.rotate = this.spacePos[Kobbo.player.index].deg * -1;
+      failLabel.rotate = this.spacePos[Kobbo.player.index].deg;
       failLabel.fontColor = "red";
 
       let successLabel = new Entities.Label(0, 0, "GAGNÉ", this.board.ctx);
       successLabel.fontColor = "green";
-      successLabel.rotate = this.spacePos[Kobbo.player.index].deg * -1;
+      successLabel.rotate = this.spacePos[Kobbo.player.index].deg;
 
       failLabel.fontSize = successLabel.fontSize = 60;
       failLabel.x = successLabel.x = player.space.width / 4 - failLabel.width / 2;
@@ -234,8 +247,7 @@ export class InGameStep extends GameStep {
                 width : this.centerSpace.width - 20,
                 height: 30
               };
-              let reveal = new Entities.Button(this.centerSpace.width / 2 - size.width / 2, this.centerSpace.height / 2 - size.height - 10, size.width, size.height, "Révéler mes cartes");
-              reveal.rotate = this.spacePos[Kobbo.player.index].deg;
+              let reveal = new Entities.Button(this.board.width / 2 - size.width / 2, this.board.height / 2 - size.height - 10, size.width, size.height, "Révéler mes cartes");
               reveal.fontSize = 20;
               // Normal
               reveal.strokeColor = "rgba(230,77,59, 1.0)";
@@ -249,9 +261,9 @@ export class InGameStep extends GameStep {
               reveal.clickStrokeColor = "rgba(230,37,39, 1.0)";
               reveal.clickFillColor = "rgba(230,37,39, 1.0)";
               reveal.clickFontColor = "white";
-              this.centerSpace.addEntity(reveal);
+              this.board.addEntity(reveal);
               reveal.onMouseEvent("click", () => {
-                this.centerSpace.removeEntity(reveal);
+                this.board.removeEntity(reveal);
                 this.sendEventToServer("end_reveal_cards", { player: Kobbo.player.uid })
                   .then((response: Network.SocketMessage) => {
                     this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
@@ -266,8 +278,7 @@ export class InGameStep extends GameStep {
               width : this.centerSpace.width - 20,
               height: 30
             };
-            let exit = new Entities.Button(this.centerSpace.width / 2 - size.width / 2, this.centerSpace.height / 2 + 10, size.width, size.height, "Quitter");
-            exit.rotate = this.spacePos[Kobbo.player.index].deg;
+            let exit = new Entities.Button(this.board.width / 2 - size.width / 2, this.board.height / 2 + 10, size.width, size.height, "Quitter");
             exit.fontSize = 20;
             // Normal
             exit.strokeColor = "rgba(230,77,59, 1.0)";
@@ -281,9 +292,9 @@ export class InGameStep extends GameStep {
             exit.clickStrokeColor = "rgba(230,37,39, 1.0)";
             exit.clickFillColor = "rgba(230,37,39, 1.0)";
             exit.clickFontColor = "white";
-            this.centerSpace.addEntity(exit);
+            this.board.addEntity(exit);
             exit.onMouseEvent("click", () => {
-              this.centerSpace.removeEntity(exit);
+              this.board.removeEntity(exit);
               this.board.networkManager.leaveRoom();
               this.board.moveToStep("main");
             });
@@ -313,10 +324,6 @@ export class InGameStep extends GameStep {
         }
       }, 1000);
     });
-  }
-
-  onLeave(): void {
-
   }
 
   initGame(): void {
