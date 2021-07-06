@@ -3,11 +3,8 @@ import {MainStep} from "../../steps/main";
 import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
 import {InGameStep} from "../../steps/ingame";
-import {Board} from '@fuwu-yuan/bgew';
+import {Board, Network} from '@fuwu-yuan/bgew';
 import {environment} from "../../../environments/environment";
-import {JulienGameServer} from "../../override/JulienGameServer";
-import {Kobbo} from "../../game/Kobbo";
-import {Player} from "../../models/player";
 
 @Component({
   selector: 'app-ingame',
@@ -21,9 +18,15 @@ export class IngameComponent implements OnInit {
 
   ngOnInit(): void {
     let board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1", 900, 900);
+    if(environment.production) {
+      console.log("APP IS IN DEV MODE");
+      board.networkManager = new class extends Network.NetworkManager {
+        get apiUrl(): string { return "http://127.0.0.1:8081/api"; }
+        get wsUrl(): string { return "ws://127.0.0.1:8081/"; }
+      }(board);
+    }
     //this.board.networkManager = new JulienGameServer(this.board);
-    board.networkManager.apiUrl = environment.apiUrl;
-    board.networkManager.wsUrl = environment.wsUrl;
+
     /* Init and start board */
     this.initSteps(board);
     board.start();

@@ -1,6 +1,9 @@
 import {AbstractNetworkManager, Network} from "@fuwu-yuan/bgew";
 
 export class JulienGameServer extends AbstractNetworkManager{
+  _apiUrl: string = ""; //TODO
+  _wsUrl: string = ""; //TODO
+
   closeRoom(uid: string, close: boolean): Promise<Network.Response> {
     return Promise.resolve({status: "error", code: "not_implemented"});
   }
