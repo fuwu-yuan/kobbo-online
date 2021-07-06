@@ -11,10 +11,10 @@ import {KobboConfig} from "../game/kobboConfig";
 import {ServerSide} from "../game/serverside";
 
 const DEBUG: boolean = false;
-const GAME_WILL_START_DURATION: number = 1; // seconds
+const GAME_WILL_START_DURATION: number = 10; // seconds
 const WATCH_CARD_DURATION: number = 5; // seconds
 const END_GAME_REVEAL_TIME: number = 5; // seconds
-const DEAL_SPEED: number = 0.1; // seconds
+const DEAL_SPEED: number = 0.5; // seconds
 
 export class InGameStep extends GameStep {
   name: string = "ingame";
