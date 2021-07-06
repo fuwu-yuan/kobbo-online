@@ -18,7 +18,7 @@ export class IngameComponent implements OnInit {
 
   ngOnInit(): void {
     let board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1", 900, 900);
-    if(environment.production) {
+    if(!environment.production) {
       console.log("APP IS IN DEV MODE");
       board.networkManager = new class extends Network.NetworkManager {
         get apiUrl(): string { return "http://127.0.0.1:8081/api"; }
