@@ -1,6 +1,6 @@
 {
   "name": "kobbo",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --live-reload=false",
@@ -8,7 +8,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "deploy": "ng deploy"
+    "deploy": "ng deploy --base-href=/kobbo-online/",
+    "push": "git add -A && git commit -m 'some updates' && git push origin master"
   },
   "private": true,
   "dependencies": {

@@ -8,6 +8,9 @@ export class Kobbo {
   public static players: Player[] = [];
   public static player: Player;
 
+  public static GAME_NAME: string = "Kobbo - Meilleur jeu de cartes";
+  public static GAME_VERSION = "0.0.1";
+
   public static sortedPlayers() {
     return Kobbo.players.sort((p1: Player, p2: Player) => {
       return p1.index - p2.index;

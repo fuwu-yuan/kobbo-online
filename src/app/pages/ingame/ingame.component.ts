@@ -5,6 +5,7 @@ import {JoinGameStep} from "../../steps/joinGame";
 import {InGameStep} from "../../steps/ingame";
 import {Board, Network} from '@fuwu-yuan/bgew';
 import {environment} from "../../../environments/environment";
+import {Kobbo} from "../../game/Kobbo";
 
 @Component({
   selector: 'app-ingame',
@@ -17,7 +18,7 @@ export class IngameComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    let board = new Board("Kobbo - Meilleur jeu de cartes", "0.0.1", 900, 900);
+    let board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, 900, 900);
     if(!environment.production) {
       console.log("APP IS IN DEV MODE");
       board.networkManager = new class extends Network.NetworkManager {

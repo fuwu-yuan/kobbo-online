@@ -11,9 +11,17 @@ export class MainStep extends GameStep {
   private createButton: Entities.Button;
   private joinButton: Entities.Button;
   private nicknameinput: Entities.InputText;
+  private versionLabel: Entities.Label;
 
   constructor(board: Board) {
     super(board);
+
+    /** Version Label */
+    this.versionLabel = new Entities.Label(this.board.width, this.board.height, Kobbo.GAME_NAME + " v" + Kobbo.GAME_VERSION, board.ctx);
+    this.versionLabel.fontSize = 12;
+    this.versionLabel.x = this.versionLabel.x - this.versionLabel.width - 10;
+    this.versionLabel.y = this.versionLabel.y - this.versionLabel.height - 10;
+    this.versionLabel.fontColor = "#555";
 
     /** Online Label */
     this.onlineLabel = new Entities.Label(board.width - 70, 10, "", board.ctx);
@@ -78,6 +86,7 @@ export class MainStep extends GameStep {
     this.board.addEntity(this.joinButton);
     this.board.addEntity(onlineLabelPrefix);
     this.board.addEntity(this.onlineLabel);
+    this.board.addEntity(this.versionLabel);
   }
 
   createGame() {
