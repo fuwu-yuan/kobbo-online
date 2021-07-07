@@ -9,7 +9,7 @@ export class Kobbo {
   public static player: Player;
 
   public static GAME_NAME: string = "Kobbo - Meilleur jeu de cartes";
-  public static GAME_VERSION = "0.0.2";
+  public static GAME_VERSION = "0.0.3";
 
   public static sortedPlayers() {
     return Kobbo.players.sort((p1: Player, p2: Player) => {
