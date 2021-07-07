@@ -228,7 +228,7 @@ export let Powers = {
 
 export let PowersHelp = {
   "watch_self" : "Regardez n'importe laquelle de vos cartes",
-  "watch_other" : "Regarderz une carte d'un autre joueur",
+  "watch_other" : "Regardez une carte d'un autre joueur",
   "blind_switch" : "Échangez une de vos carte avec celle d'un autre joueur (à l'aveugle)",
   "king_switch" : "Regardez une carte d'un autre joueur, et si elle vous plait échangez-la avec une de vos cartes (à l'aveugle)",
 }

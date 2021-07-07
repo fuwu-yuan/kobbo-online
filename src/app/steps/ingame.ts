@@ -461,7 +461,7 @@ export class InGameStep extends GameStep {
 
               // CHOOSE WITCH CARD TO SHOW [OK]
               if (this.switchingCard === null) {
-                this.sendEventToServer("power_king_switch", { player: Kobbo.player.uid, otherPlayer: card.owner.uid, card: card.owner.findCardIndex(card), step: "watch_other" })
+                this.sendEventToServer("power_king_switch", { playingPlayer: Kobbo.player.uid, player: card.owner.uid, card: card.owner.findCardIndex(card), step: "watch_other" })
                   .then((response: Network.SocketMessage) => {
                     this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
                   });
@@ -469,7 +469,7 @@ export class InGameStep extends GameStep {
               }
               // WILL NOT SWITCH [OK]
               else {
-                this.sendEventToServer("power_king_switch", { player: card.owner.uid, card: card.owner.findCardIndex(card), step: "abort" })
+                this.sendEventToServer("power_king_switch", { playingPlayer: Kobbo.player.uid, player: card.owner.uid, card: card.owner.findCardIndex(card), step: "abort" })
                   .then((response: Network.SocketMessage) => {
                     this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
                   });
@@ -579,9 +579,10 @@ export class InGameStep extends GameStep {
           this.changeGameState(GameState.USE_POWER);
           // @ts-ignore
           this.messagesService.add("Kobbo", "Vous pouvez utiliser le pouvoir: " + PowersHelp[this.drawnCard.power], true);
+          this.messagesService.add("Kobbo", "Pour ne pas utiliser le pouvoir cliquez à nouveau sur la défausse", true);
         }else {
           // @ts-ignore
-          this.messagesService.add("Kobbo", player.name + " utilise le pouvoir: " + PowersHelp[this.drawnCard.power], true);
+          this.messagesService.add("Kobbo", player.name + " peut utiliser le pouvoir: " + PowersHelp[this.drawnCard.power], true);
           this.changeGameState(GameState.WAIT);
         }
       }else {
@@ -867,10 +868,12 @@ export class InGameStep extends GameStep {
         let card = player.getCardAt(data.card);
         if (card) {
           if (step === "watch_other") {
-            card.showCard(true, player !== Kobbo.player);
+            let playingPlayer = Kobbo.findPlayerByUid(data.playingPlayer);
+            card.showCard(true, playingPlayer !== Kobbo.player);
             this.switchingCard = card;
           }else if (step === "abort") {
             card.showCard(false);
+            this.switchingCard = null;
             if (player === Kobbo.player) {
               this.messagesService.add("Kobbo", "Vous n'avez pas échangé la carte", true);
             }else {
@@ -997,7 +1000,7 @@ export class InGameStep extends GameStep {
   }
 
   onConnectionClosed() {
-    alert("La conenxion a été perdue.");
+    alert("La connexion a été perdue.");
     this.board.moveToStep("main");
   }
 }
