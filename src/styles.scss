@@ -1,0 +1,12 @@
+/* You can add global styles to this file, and also import other style files */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+// Small devices (landscape phones, 576px and up)
+@media (max-width: 576px) {
+  h1 {
+    font-size: 1.5em;
+  }
+}

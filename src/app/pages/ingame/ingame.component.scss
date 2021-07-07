@@ -1,3 +1,39 @@
+/* Using SCSS variables to store breakpoints */
+
+footer{
+  background: #2880B8;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 20px 10px;
+  color: white;
+  text-align: center;
+
+  a:visited,
+  a:active,
+  a {
+    color: white;
+    text-decoration: underline;
+    line-height: 21px;
+  }
+
+  a.share-social {
+    margin-left: 10px;
+  }
+}
+
+.not-optimized-mobile {
+  background: #2880B8;
+  color: white;
+  font-size: 24px;
+  padding: 0 20px;
+  text-align: center;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 :host ::ng-deep #game {
   display: inline-block;
 }

@@ -21,6 +21,11 @@
     "@angular/platform-browser": "~11.0.5",
     "@angular/platform-browser-dynamic": "~11.0.5",
     "@angular/router": "~11.0.5",
+    "@fortawesome/angular-fontawesome": "^0.8.2",
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-brands-svg-icons": "^5.15.3",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@fuwu-yuan/bgew": "latest",
     "@types/random-seed": "^0.3.3",
     "@types/uuid": "^8.3.0",
     "axios": "^0.21.1",
@@ -31,8 +36,7 @@
     "tslib": "^2.0.0",
     "unique-names-generator": "^4.5.0",
     "uuid": "^8.3.2",
-    "zone.js": "~0.10.2",
-    "@fuwu-yuan/bgew": "latest"
+    "zone.js": "~0.10.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1100.5",

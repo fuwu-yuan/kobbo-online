@@ -6,6 +6,7 @@ import {AppComponent} from './app.component';
 import {IngameComponent} from './pages/ingame/ingame.component';
 import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
 import {HttpClientModule} from '@angular/common/http';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import {HttpClientModule} from '@angular/common/http';
     BrowserModule,
     AppRoutingModule,
     LoggerModule.forRoot({serverLoggingUrl: '/api/logs', level: NgxLoggerLevel.DEBUG, serverLogLevel: NgxLoggerLevel.ERROR}),
-    HttpClientModule
+    HttpClientModule,
+    FontAwesomeModule
   ],
   providers: [],
   bootstrap: [AppComponent]
