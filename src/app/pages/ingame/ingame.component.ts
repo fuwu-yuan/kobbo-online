@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {MainStep} from "../../steps/main";
 import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
@@ -14,7 +14,7 @@ import { faMailBulk } from "@fortawesome/free-solid-svg-icons";
   templateUrl: './ingame.component.html',
   styleUrls: ['./ingame.component.scss']
 })
-export class IngameComponent implements OnInit {
+export class IngameComponent implements OnInit,AfterViewInit {
 
   isDesktop: boolean = true;
   currentYear: number = new Date().getFullYear();
@@ -29,11 +29,17 @@ export class IngameComponent implements OnInit {
     if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua)) {
       this.isDesktop = false;
     }
+    console.log(this.isDesktop ? "Desktop" : "Mobile");
   }
 
   ngOnInit(): void {
+  }
+
+  ngAfterViewInit(): void {
     if (this.isDesktop) {
-      let board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, 900, 900);
+      let gameElem = document.getElementById("game");
+      console.log(gameElem);
+      let board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, 900, 900, gameElem);
       if(!environment.production) {
         console.log("APP IS IN DEV MODE");
         board.networkManager = new class extends Network.NetworkManager {

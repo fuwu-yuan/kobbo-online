@@ -1,10 +1,15 @@
 /* Using SCSS variables to store breakpoints */
 
+@media (min-height: 1050px) {
+  footer {
+    position: absolute;
+    bottom: 0;
+  }
+}
+
 footer{
   background: #2880B8;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
+  width: calc(100% - 20px);
   padding: 20px 10px;
   color: white;
   text-align: center;
