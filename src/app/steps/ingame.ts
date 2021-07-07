@@ -941,11 +941,13 @@ export class InGameStep extends GameStep {
       if (player) {
         let card = player.getCardAt(data.card);
         if (card) {
+          let msgId = this.messagesService.add("Kobbo", player.name + " tente de couper...", true);
           let i = player.removeCard(card);
           this.sendToWaste(card);
 
           // FAIL
           if (card.name !== this.waste[this.waste.length-2].name) {
+            this.messagesService.edit(msgId, "Kobbo", player.name + " tente de couper, mais c'est un echec !");
             setTimeout(() => {
               player?.giveCard(card, i);
               this.waste.pop();
@@ -964,6 +966,7 @@ export class InGameStep extends GameStep {
 
           // SUCCESS
           else {
+            this.messagesService.edit(msgId, "Kobbo", player.name + " tente de couper, et c'est un succès ! Vous ne pouvez plus couper jusqu'à la prochaine carte qui sera défaussée");
             if (player !== Kobbo.player) {
               this.canCutGame = false;
             }
