@@ -1,5 +1,5 @@
 <div *ngIf="isDesktop">
-  <div id="game"></div>
+  <div id="game" [ngStyle]="{'zoom': gameZoom}"></div>
   <div id="messages">
     <h2>KOBBO</h2>
   </div>
@@ -10,8 +10,3 @@
 <div *ngIf="!isDesktop" class="not-optimized-mobile">
   Cette application n'est pas optimisée pour mobile ou tablette.
 </div>
-<footer>
-  <span>
-    ©{{ getNameAndVersion() }} | Copyright {{ currentYear }} | Developed with ❤️ by <a href="https://stco.fr/stevecohen" target="_blank">Steve Cohen</a> using <a href="https://stco.fr/bgew-github" target="_blank">BGEW</a> | <a href="https://stco.fr/kobbo-github" target="_blank">Sources on GitHub</a> | Partager sur <a target="_blank" class="share-social" href="https://www.facebook.com/sharer/sharer.php?u=https%3A//fuwu-yuan.github.io/kobbo-online/"><fa-icon [icon]="faFacebook"></fa-icon></a> <a target="_blank" class="share-social" href="https://twitter.com/intent/tweet?text=J'ai%20d%C3%A9couvert%20un%20super%20jeu%20de%20carte%20en%20ligne%20%3A%20Le%20KOBBO%20https%3A//stco.fr/kobbo"><fa-icon [icon]="faTwitter"></fa-icon></a> <a target="_blank" class="share-social" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A//stco.fr/kobbo&title=Kobbo%20-%20Meilleur%20de%20de%20cartes&summary=J'ai%20d%C3%A9couvert%20un%20super%20jeu%20de%20carte%20en%20ligne%20!%20%C3%87a%20s'appelle%20le%20KOBBO%20%3A%20https%3A//stco.fr/kobbo&source="><fa-icon [icon]="faLinkedin"></fa-icon></a> <a target="_blank" class="share-social" href="mailto:?subject=J'ai%20d%C3%A9couvert%20un%20super%20jeu%20de%20carte%20!&body=Hey%20!%20J'ai%20d%C3%A9couvert%20un%20super%20jeu%20de%20carte%20!%20%C3%87a%20s'appelle%20le%20Kobbo%20!%20Tu%20viens%20faire%20une%20partie%20en%20ligne%20?%20https%3A//stco.fr/kobbo"><fa-icon [icon]="faMailBulk"></fa-icon></a>
-  </span>
-</footer>

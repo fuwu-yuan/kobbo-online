@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, HostListener, OnInit} from '@angular/core';
 import {MainStep} from "../../steps/main";
 import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
@@ -6,8 +6,7 @@ import {InGameStep} from "../../steps/ingame";
 import {Board, Network} from '@fuwu-yuan/bgew';
 import {environment} from "../../../environments/environment";
 import {Kobbo} from "../../game/Kobbo";
-import { faFacebook, faTwitter, faLinkedin } from '@fortawesome/free-brands-svg-icons';
-import { faMailBulk } from "@fortawesome/free-solid-svg-icons";
+import {KobboConfig} from "../../game/kobboConfig";
 
 @Component({
   selector: 'app-ingame',
@@ -17,11 +16,9 @@ import { faMailBulk } from "@fortawesome/free-solid-svg-icons";
 export class IngameComponent implements OnInit,AfterViewInit {
 
   isDesktop: boolean = true;
-  currentYear: number = new Date().getFullYear();
-  faFacebook = faFacebook;
-  faTwitter = faTwitter;
-  faLinkedin = faLinkedin;
-  faMailBulk = faMailBulk;
+  screenSize: {width: number, height: number} = {height: 0, width: 0};
+  boardDefaultSize: number = 900;
+  gameZoom: string = "100%";
 
   constructor() {
     var ua = navigator.userAgent;
@@ -30,16 +27,32 @@ export class IngameComponent implements OnInit,AfterViewInit {
       this.isDesktop = false;
     }
     console.log(this.isDesktop ? "Desktop" : "Mobile");
+
+
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.screenSize.width = window.innerWidth;
+    this.screenSize.height = window.innerHeight;
+
+    let wh = Math.min(this.screenSize.width, this.screenSize.height);
+
+    this.gameZoom = Math.floor(wh / this.boardDefaultSize * 100) + "%";
+    console.log("ScreenSize: ", this.screenSize);
+    console.log("Scaling screen to " + this.gameZoom);
+
   }
 
   ngOnInit(): void {
+    this.onResize(null);
   }
 
   ngAfterViewInit(): void {
     if (this.isDesktop) {
       let gameElem = document.getElementById("game");
       console.log(gameElem);
-      let board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, 900, 900, gameElem);
+      let board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, this.boardDefaultSize, this.boardDefaultSize, gameElem);
       if(!environment.production) {
         console.log("APP IS IN DEV MODE");
         board.networkManager = new class extends Network.NetworkManager {
@@ -68,9 +81,5 @@ export class IngameComponent implements OnInit,AfterViewInit {
         new InGameStep(board)
       ]);
     }
-  }
-
-  getNameAndVersion() {
-    return `${Kobbo.GAME_NAME} v${Kobbo.GAME_VERSION}`;
   }
 }

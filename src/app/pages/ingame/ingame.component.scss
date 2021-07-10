@@ -1,31 +1,11 @@
 /* Using SCSS variables to store breakpoints */
 
-@media (min-height: 1050px) {
+/*@media (min-height: 1050px) {
   footer {
     position: absolute;
     bottom: 0;
   }
-}
-
-footer{
-  background: #2880B8;
-  width: calc(100% - 20px);
-  padding: 20px 10px;
-  color: white;
-  text-align: center;
-
-  a:visited,
-  a:active,
-  a {
-    color: white;
-    text-decoration: underline;
-    line-height: 21px;
-  }
-
-  a.share-social {
-    margin-left: 10px;
-  }
-}
+}*/
 
 .not-optimized-mobile {
   background: #2880B8;

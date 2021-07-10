@@ -1,0 +1,37 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  color: #369;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 48px;
+}
+h2, h3 {
+  color: #444;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: lighter;
+}
+
+footer{
+  margin-top: auto;
+  background: #2880B8;
+  width: calc(100% - 20px);
+  padding: 20px 10px;
+  color: white;
+  text-align: center;
+
+  a:visited,
+  a:active,
+  a {
+    color: white;
+    text-decoration: underline;
+    line-height: 21px;
+  }
+
+  a.share-social {
+    margin-left: 10px;
+  }
+}
