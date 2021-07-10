@@ -6,7 +6,7 @@ import {InGameStep} from "../../steps/ingame";
 import {Board, Network} from '@fuwu-yuan/bgew';
 import {environment} from "../../../environments/environment";
 import {Kobbo} from "../../game/Kobbo";
-import {KobboConfig} from "../../game/kobboConfig";
+import { version } from '../../../../package.json';
 
 @Component({
   selector: 'app-ingame',
@@ -28,6 +28,7 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
       this.isDesktop = false;
     }
     console.log(this.isDesktop ? "Desktop" : "Mobile");
+    Kobbo.GAME_VERSION = version;
   }
 
   @HostListener('window:resize', ['$event'])
