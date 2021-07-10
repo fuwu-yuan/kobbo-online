@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, HostListener, OnInit} from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, HostListener, OnInit} from '@angular/core';
 import {MainStep} from "../../steps/main";
 import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
@@ -13,12 +13,13 @@ import {KobboConfig} from "../../game/kobboConfig";
   templateUrl: './ingame.component.html',
   styleUrls: ['./ingame.component.scss']
 })
-export class IngameComponent implements OnInit,AfterViewInit {
+export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
 
   isDesktop: boolean = true;
   screenSize: {width: number, height: number} = {height: 0, width: 0};
   boardDefaultSize: number = 900;
-  gameZoom: string = "100%";
+  board: Board|null = null;
+  scale: number = 1;
 
   constructor() {
     var ua = navigator.userAgent;
@@ -27,8 +28,6 @@ export class IngameComponent implements OnInit,AfterViewInit {
       this.isDesktop = false;
     }
     console.log(this.isDesktop ? "Desktop" : "Mobile");
-
-
   }
 
   @HostListener('window:resize', ['$event'])
@@ -38,13 +37,18 @@ export class IngameComponent implements OnInit,AfterViewInit {
 
     let wh = Math.min(this.screenSize.width, this.screenSize.height);
 
-    this.gameZoom = Math.floor(wh / this.boardDefaultSize * 100) + "%";
+    this.scale = wh / this.boardDefaultSize;
     console.log("ScreenSize: ", this.screenSize);
-    console.log("Scaling screen to " + this.gameZoom);
-
+    console.log("Scaling screen to " + this.scale);
+    if (this.board) {
+      this.board.scale = this.scale;
+    }
   }
 
   ngOnInit(): void {
+  }
+
+  ngAfterContentInit(): void {
     this.onResize(null);
   }
 
@@ -52,19 +56,20 @@ export class IngameComponent implements OnInit,AfterViewInit {
     if (this.isDesktop) {
       let gameElem = document.getElementById("game");
       console.log(gameElem);
-      let board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, this.boardDefaultSize, this.boardDefaultSize, gameElem);
+      this.board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, this.boardDefaultSize, this.boardDefaultSize, gameElem);
+      this.board.scale = this.scale;
       if(!environment.production) {
         console.log("APP IS IN DEV MODE");
-        board.networkManager = new class extends Network.NetworkManager {
+        this.board.networkManager = new class extends Network.NetworkManager {
           get apiUrl(): string { return "http://127.0.0.1:8081/api"; }
           get wsUrl(): string { return "ws://127.0.0.1:8081/"; }
-        }(board);
+        }(this.board);
       }
       //this.board.networkManager = new JulienGameServer(this.board);
 
       /* Init and start board */
-      this.initSteps(board);
-      board.start();
+      this.initSteps(this.board);
+      this.board.start();
     }
   }
 
