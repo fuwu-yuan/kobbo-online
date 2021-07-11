@@ -10,7 +10,7 @@ import {Player} from "../models/player";
 import {KobboConfig} from "../game/kobboConfig";
 import {ServerSide} from "../game/serverside";
 
-const DEBUG: boolean = false;
+const DEBUG: boolean = true;
 const GAME_WILL_START_DURATION: number = 10; // seconds
 const WATCH_CARD_DURATION: number = 5; // seconds
 const END_GAME_REVEAL_TIME: number = 5; // seconds
@@ -228,16 +228,20 @@ export class InGameStep extends GameStep {
         if (i === END_GAME_REVEAL_TIME) {
           clearInterval(timer);
           let total = 0;
+          let detailPoints = "";
           for (const card of player.cards) {
-            card?.showCard(true);
-            total += card?.value;
+            if (card) {
+              card.showCard(true);
+              detailPoints += card.name + "("+card.value+") ";
+              total += card.value;
+            }
           }
           if (total <= KobboConfig.GAME_RULES.MIN_VALUE_TO_WIN) {
             player.space?.addEntity(successLabel);
-            this.messagesService.add("Kobbo", player.name + " à gagné ! Total des points : " + total, true);
+            this.messagesService.add("Kobbo", player.name + " à gagné ! Total des points : " + total + " [" + detailPoints + "]", true);
           }else {
             player.space?.addEntity(failLabel);
-            this.messagesService.add("Kobbo", player.name + " à perdu ! Total des points : " + total + ". Il devait faire " + KobboConfig.GAME_RULES.MIN_VALUE_TO_WIN + " ou moins.", true);
+            this.messagesService.add("Kobbo", player.name + " à perdu ! Total des points : " + total + " [" + detailPoints + "]" + ". Il devait faire " + KobboConfig.GAME_RULES.MIN_VALUE_TO_WIN + " ou moins.", true);
           }
 
           // Reveal self cards button

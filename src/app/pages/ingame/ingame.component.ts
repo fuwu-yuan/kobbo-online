@@ -38,7 +38,7 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
 
     let wh = Math.min(this.screenSize.width, this.screenSize.height);
 
-    this.scale = wh / this.boardDefaultSize;
+    this.scale = Math.round(wh / this.boardDefaultSize * 100)/100;
     console.log("ScreenSize: ", this.screenSize);
     console.log("Scaling screen to " + this.scale);
     if (this.board) {

@@ -10,7 +10,7 @@ export class MainStep extends GameStep {
   private pingTimer = { current: 0, max: 1000 };
   private createButton: Entities.Button;
   private joinButton: Entities.Button;
-  private nicknameinput: Entities.InputText;
+  private nicknameinput: Entities.ExperimentalInputtext;
   private versionLabel: Entities.Label;
 
   constructor(board: Board) {
@@ -49,7 +49,7 @@ export class MainStep extends GameStep {
     this.joinButton.onMouseEvent("click", this.joinGame.bind(this));
 
     /** Nickname */
-    this.nicknameinput = new Entities.InputText(0, 0, 200, 50);
+    this.nicknameinput = new Entities.ExperimentalInputtext(0, 0, 200, 50);
   }
 
   onEnter(): void {
