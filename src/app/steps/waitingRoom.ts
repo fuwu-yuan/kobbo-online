@@ -1,6 +1,7 @@
 import {Player} from "../models/player";
 import {Board, Entity, GameStep, Network, Entities} from "@fuwu-yuan/bgew";
 import {Kobbo} from "../game/Kobbo";
+import {MessagesService} from "../services/messages.service";
 
 export class WaitingRoomStep extends GameStep {
   name: string = "waitingroom";
@@ -12,6 +13,8 @@ export class WaitingRoomStep extends GameStep {
   private startButton: Entities.Button|null = null;
   private readyButton: Entities.Button|null = null;
   private readyPlayersLabel: Entities.Label|null = null;
+
+  private messagesService;
 
   private data: any;
 
@@ -31,6 +34,8 @@ export class WaitingRoomStep extends GameStep {
     let cardsP4 = new Image();
     //cardsP4.src = "/assets/images/creategame/p4.png";
     this.images.push(cardsP4);
+
+    this.messagesService = MessagesService.getInstance();
   }
 
   onEnter(data: any): void {
@@ -54,12 +59,17 @@ export class WaitingRoomStep extends GameStep {
       }
     }
 
+    /** Init chat */
+    this.initChat();
+
     /** Create player locally */
     let index = this.getFreeIndex();
     let player = new Player(index, data.uid, data.nickname);
     Kobbo.player = this.addPlayer(player);
     Kobbo.player.isHost = data.isHost;
     Kobbo.player.ready = data.isHost;
+
+    this.messagesService.add("Kobbo", "Bienvenue dans la partie '" + data.room.name + "' " + data.nickname, true);
 
     /** Add player to server data and update player list */
     this.board.networkManager.setRoomData({players: [JSON.parse(JSON.stringify(Kobbo.player))]}, true)
@@ -72,6 +82,23 @@ export class WaitingRoomStep extends GameStep {
 
     /** Send nickname to other players */
     this.board.networkManager.sendMessage({nickname: data.nickname});
+  }
+
+  initChat() {
+    this.messagesService.show();
+    this.messagesService.onMessageSent(this.onMessageSent.bind(this));
+  }
+
+  onMessageSent(message: string) {
+    this.board.networkManager.sendMessage({
+      action: "chat",
+      data: {
+        username: Kobbo.player.name,
+        message: message
+      }
+    }).then((response: Network.SocketMessage) => {
+      this.messagesService.add(Kobbo.player.name, message);
+    });
   }
 
   addControlButtons() {
@@ -106,6 +133,7 @@ export class WaitingRoomStep extends GameStep {
       this.readyButton.onMouseEvent("click", (event: MouseEvent) => {
         this.board.networkManager.sendMessage({ready: !Kobbo.player.ready}).then((res) => {
           Kobbo.player.ready = !Kobbo.player.ready;
+          this.messagesService.add("Kobbo", Kobbo.player.ready ? "Vous êtes prêt !" : "Vous n'êtes pas prêt !", true);
           if (this.readyButton) {
             if (Kobbo.player.ready) {
               this.readyButton.text = "Je ne suis pas prêt";
@@ -122,6 +150,16 @@ export class WaitingRoomStep extends GameStep {
   onNetworkMessage(message: Network.SocketMessage) {
     console.log("Message received: ", message);
 
+    if (message.data.msg.action) {
+      switch (message.data.msg.action) {
+        case "chat":
+          let username = message.data.msg.data.username;
+          let msg = message.data.msg.data.message;
+          this.messagesService.add(username, msg);
+          break;
+      }
+    }
+
     /* A player is ready */
     if ("ready" in message.data.msg) {
       let player = Kobbo.players.find((p) => {
@@ -130,6 +168,7 @@ export class WaitingRoomStep extends GameStep {
       if (player) {
         player.ready = message.data.msg.ready;
         console.log("Player " + message.sender + " is " + (player.ready ? "" : "NOT ") + "ready");
+        this.messagesService.add("Kobbo", player.name + (player.ready ? " est prêt" : " n'est pas prêt") + ".", true);
         if (Kobbo.player.isHost) {
           this.board.networkManager.setRoomData({players: Kobbo.players}, false).then((response: Network.Response) => {
             this.data = response.data;
@@ -157,6 +196,7 @@ export class WaitingRoomStep extends GameStep {
       let player = Kobbo.findPlayerByUid(message.sender);
       if (player) {
         player.name = message.data.msg.nickname;
+        this.messagesService.add("Kobbo", player.name + " à rejoint la partie.", true);
       }
     }
 
@@ -184,6 +224,7 @@ export class WaitingRoomStep extends GameStep {
     });
     if (index > -1) {
       let player = Kobbo.players[index];
+      this.messagesService.add("Kobbo", player.name + " à quitté la partie.", true);
       this.board.removeEntity(this.imagesEntities[player.index]);
       this.imagesEntities[player.index] = null;
       Kobbo.players.splice(index, 1);
@@ -228,6 +269,8 @@ export class WaitingRoomStep extends GameStep {
   }
 
   onLeave(): void {
+    this.messagesService.offMessageSent(this.onMessageSent);
+    this.messagesService.clear();
   }
 
   private updatePlayersReadyLabel() {
@@ -237,7 +280,7 @@ export class WaitingRoomStep extends GameStep {
         return p1.index - p2.index;
       })
       for (let i = 0; i < players.length; i++) {
-        this.readyPlayersLabel.text = this.readyPlayersLabel.text + (players[i].ready ? "✅ " : "❌ ") + players[i].name + "\n";
+        this.readyPlayersLabel.text = this.readyPlayersLabel.text + (players[i].ready ? "✅ " : "❌ ") + players[i].name + "\n\n";
       }
     }
   }

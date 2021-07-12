@@ -2,6 +2,7 @@ import {Board, Entities, GameStep} from "@fuwu-yuan/bgew";
 import {adjectives, animals, colors, Config, uniqueNamesGenerator} from 'unique-names-generator';
 import { v4 as uuidv4 } from 'uuid';
 import {Kobbo} from "../game/Kobbo";
+import {MessagesService} from "../services/messages.service";
 
 export class MainStep extends GameStep {
   name: string = "main";

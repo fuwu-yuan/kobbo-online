@@ -1,7 +1,9 @@
-<div *ngIf="isDesktop">
-  <div id="game" [ngStyle]="{'zoom': scale}"></div>
-  <div id="messages">
-    <h2>KOBBO</h2>
+<div *ngIf="isDesktop" class="game-container" [ngStyle]="{'zoom': scale}">
+  <div id="game"></div>
+  <div id="chat">
+    <h2>Messagerie</h2>
+    <div class="messages"></div>
+    <input name="msg" placeholder="Discutez ici">
   </div>
   <div id="debug">
     <h2>DEBUG</h2>

@@ -1,11 +1,38 @@
+import {Dispatcher} from "../classes/Dispatcher";
 
 export class MessagesService {
 
-  private messagesElem: HTMLElement | null;
-  private static _instance: MessagesService|null = null;
+  protected chatElem: HTMLElement | null;
+  protected messages: HTMLElement | null;
+  protected input: HTMLInputElement | null;
+  protected static _instance: MessagesService|null = null;
+  protected _dispatcher = new Dispatcher();
 
   private constructor() {
-    this.messagesElem = document.getElementById("messages");
+    this.chatElem = document.getElementById("chat");
+    this.messages = document.querySelector("#chat .messages");
+    this.input = document.querySelector("#chat input[name='msg']");
+
+    if (this.input) {
+      this.input.onkeyup = (event: KeyboardEvent) => {
+        if (event.keyCode === 13) {
+          if (this.input) {
+            if (this.input.value.length > 0) {
+              this._dispatcher.dispatch("message", this.input.value);
+              this.input.value = "";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  onMessageSent(callback: (message: string) => void) {
+    this._dispatcher.on("message", callback);
+  }
+
+  offMessageSent(callback: (message: string) => void) {
+    this._dispatcher.off("message", callback);
   }
 
   static getInstance(): MessagesService {
@@ -16,22 +43,24 @@ export class MessagesService {
   }
 
   clear() {
-    if (this.messagesElem) {
-      this.messagesElem.innerHTML = "<h2>KOBBO</h2>";
+    if (this.messages) {
+      this.messages.innerHTML = "";
     }
   }
 
   show() {
-    if (this.messagesElem) {
-      this.messagesElem.className = this.messagesElem?.className + " show";
+    if (this.chatElem) {
+      let classes = this.chatElem.classList;
+      classes.add("show");
+      this.chatElem.className = classes.value;
     }
   }
 
   hide() {
-    if (this.messagesElem) {
-      let classes = this.messagesElem.classList;
+    if (this.chatElem) {
+      let classes = this.chatElem.classList;
       classes.remove("show");
-      this.messagesElem.className = classes.value;
+      this.chatElem.className = classes.value;
     }
   }
 
@@ -50,7 +79,7 @@ export class MessagesService {
      */
 
     let uid = (new Date()).getTime().toString();
-    if (this.messagesElem) {
+    if (this.messages) {
       let titleElem = document.createElement("div");
       titleElem.id = "msg-title-"+uid;
       titleElem.className = "title";
@@ -67,9 +96,9 @@ export class MessagesService {
       }
       messageElem.innerHTML = message;
 
-      this.messagesElem.append(titleElem);
-      this.messagesElem.append(messageElem);
-      this.messagesElem.scrollTop = this.messagesElem.scrollHeight;
+      this.messages.append(titleElem);
+      this.messages.append(messageElem);
+      this.messages.scrollTop = this.messages.scrollHeight;
     }
     return uid;
   }

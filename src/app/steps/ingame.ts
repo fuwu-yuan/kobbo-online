@@ -10,7 +10,7 @@ import {Player} from "../models/player";
 import {KobboConfig} from "../game/kobboConfig";
 import {ServerSide} from "../game/serverside";
 
-const DEBUG: boolean = true;
+const DEBUG: boolean = false;
 const GAME_WILL_START_DURATION: number = 10; // seconds
 const WATCH_CARD_DURATION: number = 5; // seconds
 const END_GAME_REVEAL_TIME: number = 5; // seconds
@@ -76,7 +76,7 @@ export class InGameStep extends GameStep {
   async onEnter(data: any) {
     console.log("Entering InGame");
     this.randomseed.seed(data.data.seed);
-    this.messagesService.show();
+    this.initChat();
     console.log(Kobbo.players);
     this.initGame();
     this.initBoard();
@@ -97,9 +97,27 @@ export class InGameStep extends GameStep {
     }
   }
 
+  initChat() {
+    this.messagesService.show();
+    this.messagesService.onMessageSent(this.onMessageSent.bind(this));
+  }
+
+  onMessageSent(message: string) {
+    this.board.networkManager.sendMessage({
+      action: "chat",
+      data: {
+        username: Kobbo.player.name,
+        message: message
+      }
+    }).then((response: Network.SocketMessage) => {
+      this.messagesService.add(Kobbo.player.name, message);
+    });
+  }
+
   onLeave(): void {
     this.messagesService.clear();
-    this.messagesService.show;
+    this.messagesService.hide();
+    this.messagesService.offMessageSent(this.onMessageSent.bind(this));
   }
 
   changeGameState(state: string) {
@@ -985,6 +1003,15 @@ export class InGameStep extends GameStep {
       let event = msg.data.msg.event;
       let data = msg.data.msg.data;
       this.onGameEvent(event, data);
+    }
+    if (msg.data.msg.action) {
+      switch (msg.data.msg.action) {
+        case "chat":
+          let username = msg.data.msg.data.username;
+          let message = msg.data.msg.data.message;
+          this.messagesService.add(username, message);
+          break;
+      }
     }
   }
 
