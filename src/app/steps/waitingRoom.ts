@@ -86,7 +86,7 @@ export class WaitingRoomStep extends GameStep {
 
   initChat() {
     this.messagesService.show();
-    this.messagesService.onMessageSent(this.onMessageSent.bind(this));
+    this.messagesService.onMessageSent(this.onMessageSent);
   }
 
   onMessageSent(message: string) {
@@ -269,6 +269,7 @@ export class WaitingRoomStep extends GameStep {
   }
 
   onLeave(): void {
+    console.log("Leaving waiting room");
     this.messagesService.offMessageSent(this.onMessageSent);
     this.messagesService.clear();
   }
