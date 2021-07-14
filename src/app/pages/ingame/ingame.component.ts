@@ -6,7 +6,9 @@ import {InGameStep} from "../../steps/ingame";
 import {Board, Network} from '@fuwu-yuan/bgew';
 import {environment} from "../../../environments/environment";
 import {Kobbo} from "../../game/Kobbo";
-import { version } from '../../../../package.json';
+import {version} from '../../../../package.json';
+import {ActivatedRoute} from '@angular/router';
+import {animals, colors, uniqueNamesGenerator} from "unique-names-generator";
 
 @Component({
   selector: 'app-ingame',
@@ -21,7 +23,7 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
   board: Board|null = null;
   scale: number = 1;
 
-  constructor() {
+  constructor(private route: ActivatedRoute) {
     var ua = navigator.userAgent;
 
     if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua)) {
@@ -71,6 +73,9 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
       /* Init and start board */
       this.initSteps(this.board);
       this.board.start();
+
+      /* Check short game access */
+      this.checkShortGameAccess();
     }
   }
 
@@ -87,5 +92,32 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
         new InGameStep(board)
       ]);
     }
+  }
+
+  private checkShortGameAccess() {
+    this.route.queryParams
+      .subscribe(params => {
+          if (Object.keys(params).indexOf("game") > -1) {
+            let defaultNickname = uniqueNamesGenerator({
+              dictionaries: [colors, animals],
+              separator: '',
+              length: 2,
+              style: "capital"
+            });
+            let nickname = prompt("Choisissez un pseudo", defaultNickname);
+            if (nickname !== null) {
+              this.board?.networkManager.joinRoom(params["game"]).then((response: Network.Response) => {
+                if (response.status === "success") {
+                  this.board?.moveToStep("waitingroom", Object.assign({}, response.data, { isHost: false, nickname: nickname }));
+                }else {
+                  if (response.code === "room_full") {
+                    alert("Il n'y a plus de place dans cette partie.");
+                  }
+                }
+              });
+            }
+          }
+        }
+      );
   }
 }
