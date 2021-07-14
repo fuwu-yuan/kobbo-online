@@ -48,7 +48,7 @@
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": false,
+              "buildOptimizer": false
             },
             "production": {
               "fileReplacements": [
@@ -87,6 +87,9 @@
           "configurations": {
             "production": {
               "browserTarget": "Kobbo:build:production"
+            },
+            "stage": {
+              "browserTarget": "Kobbo:build:stage"
             }
           }
         },
@@ -135,6 +138,9 @@
           "configurations": {
             "production": {
               "devServerTarget": "Kobbo:serve:production"
+            },
+            "stage": {
+              "devServerTarget": "Kobbo:serve:stage"
             }
           }
         },
