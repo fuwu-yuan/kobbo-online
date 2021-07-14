@@ -36,7 +36,7 @@
             "scripts": []
           },
           "configurations": {
-            "stage": {
+            "test": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -44,11 +44,13 @@
                 }
               ],
               "optimization": false,
+              "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": false
+              "buildOptimizer": false,
+              "budgets": []
             },
             "production": {
               "fileReplacements": [
@@ -88,8 +90,8 @@
             "production": {
               "browserTarget": "Kobbo:build:production"
             },
-            "stage": {
-              "browserTarget": "Kobbo:build:stage"
+            "test": {
+              "browserTarget": "Kobbo:build:test"
             }
           }
         },
@@ -139,14 +141,17 @@
             "production": {
               "devServerTarget": "Kobbo:serve:production"
             },
-            "stage": {
-              "devServerTarget": "Kobbo:serve:stage"
+            "test": {
+              "devServerTarget": "Kobbo:serve:test"
             }
           }
         },
         "deploy": {
           "builder": "angular-cli-ghpages:deploy",
-          "options": {}
+          "options": {
+            "baseHref": "/kobbo-online/",
+            "buildTarget": "test"
+          }
         }
       }
     }
