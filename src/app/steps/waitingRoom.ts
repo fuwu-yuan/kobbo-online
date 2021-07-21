@@ -46,7 +46,10 @@ export class WaitingRoomStep extends GameStep {
 
     /** Add background */
     let background = new class extends Entity {
-      draw(ctx: CanvasRenderingContext2D): void { this.board?.ctx.drawImage(self.background, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height); }
+      draw(ctx: CanvasRenderingContext2D): void {
+        super.draw(ctx);
+        this.board?.ctx.drawImage(self.background, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
+      }
       update(): void {}
     }(0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
     this.board.addEntity(background);
@@ -259,6 +262,7 @@ export class WaitingRoomStep extends GameStep {
         this.image = image;
       }
       draw(ctx: CanvasRenderingContext2D): void {
+        super.draw(ctx);
         this.board?.ctx.drawImage(this.image, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
       }
       update(): void {}

@@ -28,7 +28,10 @@ export class JoinGameStep extends GameStep {
 
     /** Background */
     let background = new class extends Entity {
-      draw(ctx: CanvasRenderingContext2D): void { this.board?.ctx.drawImage(self.background, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height); }
+      draw(ctx: CanvasRenderingContext2D): void {
+        super.draw(ctx);
+        this.board?.ctx.drawImage(self.background, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
+      }
       update(): void {}
     }(0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
     this.board.addEntity(background);

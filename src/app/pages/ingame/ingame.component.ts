@@ -9,6 +9,8 @@ import {Kobbo} from "../../game/Kobbo";
 import {version} from '../../../../package.json';
 import {ActivatedRoute} from '@angular/router';
 import {animals, colors, uniqueNamesGenerator} from "unique-names-generator";
+import {DomSanitizer} from "@angular/platform-browser";
+import {MessagesService} from "../../services/messages.service";
 
 @Component({
   selector: 'app-ingame',
@@ -23,7 +25,7 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
   board: Board|null = null;
   scale: number = 1;
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer) {
     var ua = navigator.userAgent;
 
     if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua)) {
@@ -41,10 +43,9 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
     let wh = Math.min(this.screenSize.width, this.screenSize.height);
 
     this.scale = Math.round(wh / this.boardDefaultSize * 100)/100;
-    console.log("ScreenSize: ", this.screenSize);
-    console.log("Scaling screen to " + this.scale);
     if (this.board) {
       this.board.scale = this.scale;
+      MessagesService.getInstance().scale(this.board.scale);
     }
   }
 
@@ -61,6 +62,7 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
       console.log(gameElem);
       this.board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, this.boardDefaultSize, this.boardDefaultSize, gameElem);
       this.board.scale = this.scale;
+      MessagesService.getInstance().scale(this.board.scale);
       if(!environment.production) {
         console.log("APP IS IN DEV MODE");
         this.board.networkManager = new class extends Network.NetworkManager {
@@ -119,5 +121,15 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
           }
         }
       );
+  }
+
+  get stylish() {
+    return this.sanitizer.bypassSecurityTrustStyle(`
+      zoom: ${this.scale};
+      -ms-zoom: ${this.scale};
+      -webkit-zoom: ${this.scale};
+      -moz-transform:  scale(${this.scale},${this.scale});
+      -moz-transform-Origin: left top;
+    `);
   }
 }

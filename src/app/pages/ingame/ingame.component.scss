@@ -21,6 +21,7 @@
 
 .game-container {
   white-space: nowrap;
+  transform-origin: 0 0;
 }
 
 :host ::ng-deep #game {
@@ -82,7 +83,7 @@
   .messages {
     overflow: scroll;
     width: 100%;
-    height: 775px;
+    height: 93%;
   }
 
   input[name="msg"] {

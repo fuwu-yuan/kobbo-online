@@ -34,6 +34,9 @@ export class Card extends Entities.Square {
     this._backRedImage = new Image();
     this._lockedImage = new Image();
     this._image = this.loadImages();
+    this.strokeColor = "transparent";
+    this.hoverStrokeColor = "transparent";
+    this.clickStrokeColor = "transparent";
   }
 
   get value() {
@@ -164,6 +167,7 @@ export class Card extends Entities.Square {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
+    super.draw(ctx);
     ctx.drawImage(
       this.image,
       this.x,

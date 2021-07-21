@@ -114,4 +114,11 @@ export class MessagesService {
       msgElem.innerHTML = message;
     }
   }
+
+  scale(scale: number) {
+    if (this.chatElem) {
+      this.chatElem.style.height = `${900*scale-50}px`;
+      this.chatElem.style.width = `${400*scale-50}px`;
+    }
+  }
 }
