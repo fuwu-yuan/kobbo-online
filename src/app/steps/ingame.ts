@@ -99,10 +99,10 @@ export class InGameStep extends GameStep {
 
   initChat() {
     this.messagesService.show();
-    this.messagesService.onMessageSent(this.onMessageSent.bind(this));
+    this.messagesService.onMessageSent(this.onMessageSent);
   }
 
-  onMessageSent(message: string) {
+  onMessageSent = ((message: string) => {
     this.board.networkManager.sendMessage({
       action: "chat",
       data: {
@@ -112,12 +112,12 @@ export class InGameStep extends GameStep {
     }).then((response: Network.SocketMessage) => {
       this.messagesService.add(Kobbo.player.name, message);
     });
-  }
+  }).bind(this);
 
   onLeave(): void {
     this.messagesService.clear();
     this.messagesService.hide();
-    this.messagesService.offMessageSent(this.onMessageSent.bind(this));
+    this.messagesService.offMessageSent(this.onMessageSent);
   }
 
   changeGameState(state: string) {
