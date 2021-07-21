@@ -95,7 +95,7 @@ export class WaitingRoomStep extends GameStep {
     this.messagesService.onMessageSent(this.onMessageSent);
   }
 
-  onMessageSent = ((message: string) => {
+  onMessageSent = (message: string) => {
     this.board.networkManager.sendMessage({
       action: "chat",
       data: {
@@ -105,7 +105,7 @@ export class WaitingRoomStep extends GameStep {
     }).then((response: Network.SocketMessage) => {
       this.messagesService.add(Kobbo.player.name, message);
     });
-  }).bind(this)
+  }
 
   addControlButtons() {
     var size = {width: 300, height: 60};
