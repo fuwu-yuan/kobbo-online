@@ -3,6 +3,8 @@ import {Board, Entity, GameStep, Network, Entities} from "@fuwu-yuan/bgew";
 import {Kobbo} from "../game/Kobbo";
 import {MessagesService} from "../services/messages.service";
 
+const GAME_START_TIMER = 5; //seconds
+
 export class WaitingRoomStep extends GameStep {
   name: string = "waitingroom";
 
@@ -17,6 +19,7 @@ export class WaitingRoomStep extends GameStep {
   private messagesService;
 
   private data: any;
+  private startCounter: number = -1;
 
   constructor(board: Board) {
     super(board);
@@ -131,9 +134,34 @@ export class WaitingRoomStep extends GameStep {
       this.startButton.text = "En attente des autres joueurs";
       this.startButton.disabled = true;
       this.startButton.onMouseEvent("click", (event: MouseEvent) => {
-        this.board.networkManager.sendMessage({start: true}).then(() => {
-          this.board.moveToStep("ingame", this.data);
-        });
+        if (this.startButton) {
+          // Le compteur n'a pas démarré
+          if (this.startCounter === -1) {
+            let cnt = GAME_START_TIMER;
+            this.startButton.text = "Annuler";
+            this.startCounter = setInterval(() => {
+              if (cnt === 0) {
+                clearInterval(this.startCounter);
+                this.startCounter = -1;
+                this.board.networkManager.sendMessage({start: "start"}).then(() => {
+                  this.board.moveToStep("ingame", this.data);
+                });
+              }else {
+                this.board.networkManager.sendMessage({start: cnt}).then(() => {
+                  this.messagesService.add("Kobbo", "Début de la partie dans "+cnt+" seconde" + (cnt>1?"s":""), true);
+                  cnt--;
+                });
+              }
+            }, 1000);
+          }else {
+            this.startButton.text = "Démarrer la partie";
+            clearInterval(this.startCounter);
+            this.startCounter = -1;
+            this.board.networkManager.sendMessage({start: "abort"}).then(() => {
+              this.messagesService.add("Kobbo", "Démarrage annulé.", true);
+            });
+          }
+        }
       });
       this.board.addEntity(this.startButton);
     }else {
@@ -194,6 +222,10 @@ export class WaitingRoomStep extends GameStep {
             }else {
               this.startButton.text = "En attente des autres joueurs";
               this.startButton.disabled = true;
+              if (this.startCounter !== -1) {
+                clearInterval(this.startCounter);
+                this.startCounter = -1;
+              }
             }
           }
         }
@@ -211,8 +243,13 @@ export class WaitingRoomStep extends GameStep {
 
     /* Game start */
     if ("start" in message.data.msg) {
-      if (message.data.msg.start) {
+      if (message.data.msg.start === "start") {
         this.board.moveToStep("ingame", this.data);
+      }else if (message.data.msg.start === "abort") {
+        this.messagesService.add("Kobbo", "Démarrage annulé.", true);
+      }else {
+        let sec = parseInt(message.data.msg.start);
+        this.messagesService.add("Kobbo", "Début de la partie dans "+sec+" seconde" + (sec>1?"s":""), true);
       }
     }
   }
@@ -242,6 +279,10 @@ export class WaitingRoomStep extends GameStep {
         this.board.networkManager.setRoomData({players: Kobbo.players}, false).then((response: Network.Response) => {
           this.data = response.data;
         });
+      }
+      if (this.startCounter !== -1) {
+        clearInterval(this.startCounter);
+        this.startCounter = -1;
       }
     }
   }
