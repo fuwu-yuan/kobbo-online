@@ -54,6 +54,11 @@ export class MainStep extends GameStep {
   }
 
   onEnter(): void {
+    /*var url = window.location.href;
+    var urlSplit = url.split( "?" );
+    var stateObj = { Title : Kobbo.GAME_NAME, Url: urlSplit[0] };
+    history.pushState(stateObj, stateObj.Title, stateObj.Url);*/
+
     this.pingTimer = { current: 0, max: 1000 };
 
     Kobbo.players = [];

@@ -56,10 +56,10 @@ export class WaitingRoomStep extends GameStep {
     this.board.addEntity(this.readyPlayersLabel);
 
     /** Set game URL */
-    var url = window.location.href;
+    /*var url = window.location.href;
     var urlSplit = url.split( "?" );
-    var stateObj = { Title : "New title", Url: urlSplit[0] + "?game="+data.room.uid};
-    history.pushState(stateObj, stateObj.Title, stateObj.Url);
+    var stateObj = { Title : data.room.name, Url: urlSplit[0] + "?game="+data.room.uid};
+    history.pushState(stateObj, stateObj.Title, stateObj.Url);*/
 
     /** Add all existing players */
     if (data.room.data.players) {
