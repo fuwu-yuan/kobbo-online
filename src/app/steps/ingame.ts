@@ -9,6 +9,7 @@ import {DebugService} from "../services/debug.service";
 import {Player} from "../models/player";
 import {KobboConfig} from "../game/kobboConfig";
 import {ServerSide} from "../game/serverside";
+import {not} from "rxjs/internal-compatibility";
 
 const DEBUG: boolean = false;
 const GAME_WILL_START_DURATION: number = 10; // seconds
@@ -83,17 +84,13 @@ export class InGameStep extends GameStep {
     this.initEvents();
     this.board.addEntity(this.FPSLabel);
     await this.deal();
-    await this.gameWillStart();
+    this.gameWillStart();
     this.createKobboButton();
 
     this.debugService.set("User uid", Kobbo.player.__toString(), "user_uid");
 
-    this.changeGameState(GameState.WAIT);
     if (Kobbo.player === Kobbo.sortedPlayers()[0]) {
       this.serverSide = new ServerSide(this.board);
-      this.serverSide.nextPlayer().then((response: Network.SocketMessage) => {
-        this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
-      });
     }
   }
 
@@ -326,7 +323,47 @@ export class InGameStep extends GameStep {
     }
   }
 
-  gameWillStart(): Promise<void> {
+  gameWillStart() {
+    for (const p of Kobbo.players) { p.ready = false; }
+    this.changeGameState(GameState.GAME_WILL_START);
+    let player = Kobbo.player;
+    if (player.space) {
+      let buttonSize = { width: 80, height: 25 };
+      let readyBtn = new Entities.Button(
+        player.space.width / 4  - buttonSize.width / 2,
+        player.space.height / 2 - buttonSize.height / 2,
+        buttonSize.width,
+        buttonSize.height,
+        "Prêt"
+      );
+      readyBtn.fontSize = 16;
+      // Normal
+      readyBtn.strokeColor = "rgba(11,156,49, 1.0)";
+      readyBtn.fontColor = "rgba(11,156,49, 1.0)";
+      // Hover
+      readyBtn.hoverFillColor = "rgba(11,156,49, 0.8)";
+      readyBtn.hoverFontColor = "white";
+      readyBtn.hoverCursor = "pointer";
+
+      readyBtn.onMouseEvent("click", () => {
+        player.space?.removeEntity(readyBtn);
+        for (const card of [player.cards[0], player.cards[1]]) {
+          if (card?.cardVisible) {
+            card.dispatcher.dispatch("click", new MouseEvent("click"));
+          }
+        }
+        this.changeGameState(GameState.WAIT);
+        this.sendEventToServer("ready", { player: Kobbo.player.uid })
+          .then((response: Network.SocketMessage) => {
+            this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
+          });
+      });
+
+      player.space.addEntity(readyBtn);
+    }
+  }
+
+  gameWillStartOld(): Promise<void> {
     let msgUid = this.messagesService.add("Kobbo", "La partie va commencer, vous avez " + GAME_WILL_START_DURATION + " secondes pour regarder vos 2 cartes du bas", true);
     let i = 0;
     return new Promise((resolve) => {
@@ -721,7 +758,28 @@ export class InGameStep extends GameStep {
     console.log("Event: " + event);
     console.log("Data: ", data);
 
-    if (event === "next_player") {
+    if (event === "ready") {
+      let player = Kobbo.findPlayerByUid(data.player);
+      if (player) {
+        player.ready = true;
+        this.messagesService.add("Kobbo", player.name + " est prêt", true);
+        let notReadyPlayers = Kobbo.players.filter((p) => {
+          return p && !p.ready;
+        });
+        if (notReadyPlayers.length === 0) {
+          this.messagesService.add("Kobbo", "Tout le monde est prêt, que le meilleur gagne !", true);
+          if (this.serverSide) {
+            this.serverSide.nextPlayer().then((response: Network.SocketMessage) => {
+              this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
+            });
+          }
+        }else {
+          this.messagesService.add("Kobbo", "En attente de " + notReadyPlayers.map(( p: Player) => { return p.name; }).join(", ") + ".", true);
+        }
+      }
+    }
+
+    else if (event === "next_player") {
       let player = Kobbo.findPlayerByUid(data.player);
       if (player) {
         this.playingPlayer = player;
