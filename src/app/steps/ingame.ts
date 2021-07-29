@@ -9,13 +9,13 @@ import {DebugService} from "../services/debug.service";
 import {Player} from "../models/player";
 import {KobboConfig} from "../game/kobboConfig";
 import {ServerSide} from "../game/serverside";
-import {not} from "rxjs/internal-compatibility";
 
 const DEBUG: boolean = false;
 const GAME_WILL_START_DURATION: number = 10; // seconds
 const WATCH_CARD_DURATION: number = 5; // seconds
 const END_GAME_REVEAL_TIME: number = 5; // seconds
 const DEAL_SPEED: number = 0.5; // seconds
+const GAMETABLE_PADDING = 64;
 
 export class InGameStep extends GameStep {
   name: string = "ingame";
@@ -29,6 +29,7 @@ export class InGameStep extends GameStep {
   private waste: Waste;
 
   // Containers and Entities
+  private background: Entities.Image;
   private gametable: Entities.Container;
   private centerSpace: Entities.Container;
   private drawnCard: Card|null = null;
@@ -51,10 +52,11 @@ export class InGameStep extends GameStep {
 
   constructor(board: Board) {
     super(board);
+    this.background = new Entities.Image(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, "./assets/images/background.jpg");
     this.stock = new Stock();
     this.waste = new Waste();
     this.randomseed = randomseed();
-    this.gametable = new Entities.Container(0, 0, board.width, board.height);
+    this.gametable = new Entities.Container(GAMETABLE_PADDING, GAMETABLE_PADDING, board.width - (GAMETABLE_PADDING*2), board.height - (GAMETABLE_PADDING*2));
     this.centerSpace = new Entities.Container(0, 0, 0, 0);
     this.FPSLabel = new Entities.Label(this.board.width - 60, 10, "FPS: -", this.board.ctx);
     this.FPSLabel.fontSize = 14;
@@ -76,6 +78,7 @@ export class InGameStep extends GameStep {
 
   async onEnter(data: any) {
     console.log("Entering InGame");
+    KobboConfig.setLightBackground();
     this.randomseed.seed(data.data.seed);
     this.initChat();
     console.log(Kobbo.players);
@@ -115,6 +118,9 @@ export class InGameStep extends GameStep {
     this.messagesService.clear();
     this.messagesService.hide();
     this.messagesService.offMessageSent(this.onMessageSent);
+    this.stock = new Stock();
+    this.waste = new Waste();
+    Kobbo.players = [];
   }
 
   changeGameState(state: string) {
@@ -149,8 +155,8 @@ export class InGameStep extends GameStep {
     });
 
     let spaceSize = {
-      width: this.board.width/3,
-      height: this.board.height/3
+      width: this.gametable.width/3,
+      height: this.gametable.height/3
     };
     let pos = { x: spaceSize.width, y: spaceSize.height*2, deg: 0 };
     let parent = new Entities.Container(pos.x, pos.y, spaceSize.width, spaceSize.height);
@@ -169,10 +175,10 @@ export class InGameStep extends GameStep {
   createKobboButton() {
     let player = Kobbo.player;
     if (player.space) {
-      let buttonSize = { width: 80, height: 25 };
+      let buttonSize = { width: 150, height: 40 };
       this.kobboButton = new Entities.Button(
-        player.space.width / 4  - buttonSize.width / 2,
-        player.space.height / 2 - buttonSize.height / 2,
+        this.board.width / 2 - buttonSize.width / 2,
+        this.board.height - GAMETABLE_PADDING / 2 - buttonSize.height / 2,
         buttonSize.width,
         buttonSize.height,
         "KOBBO"
@@ -204,7 +210,7 @@ export class InGameStep extends GameStep {
             if (undo) {
               clearTimeout(undo);
             }
-            player.space?.removeEntity(this.kobboButton);
+            this.board.removeEntity(this.kobboButton);
             this.changeGameState(GameState.WAIT);
             this.sendEventToServer("kobbo", { player: Kobbo.player.uid })
               .then((response: Network.SocketMessage) => {
@@ -215,7 +221,7 @@ export class InGameStep extends GameStep {
       });
 
       this.kobboButton.visible = false;
-      player.space.addEntity(this.kobboButton);
+      this.board.addEntity(this.kobboButton);
     }
   }
 
@@ -324,29 +330,35 @@ export class InGameStep extends GameStep {
   }
 
   gameWillStart() {
+    this.messagesService.add("Kobbo", "[TIP] Regardez vos 2 cartes du bas et mémorisez-les. Quand vous êtes prêts, cliquez sur \"Prêt\"", true);
     for (const p of Kobbo.players) { p.ready = false; }
     this.changeGameState(GameState.GAME_WILL_START);
     let player = Kobbo.player;
     if (player.space) {
-      let buttonSize = { width: 80, height: 25 };
+      let buttonSize = { width: 150, height: 40 };
       let readyBtn = new Entities.Button(
-        player.space.width / 4  - buttonSize.width / 2,
-        player.space.height / 2 - buttonSize.height / 2,
+        this.board.width / 2 - buttonSize.width / 2,
+        this.board.height - GAMETABLE_PADDING / 2 - buttonSize.height / 2,
         buttonSize.width,
         buttonSize.height,
         "Prêt"
       );
-      readyBtn.fontSize = 16;
+      readyBtn.fontSize = 20;
       // Normal
-      readyBtn.strokeColor = "rgba(11,156,49, 1.0)";
-      readyBtn.fontColor = "rgba(11,156,49, 1.0)";
+      readyBtn.strokeColor = "white";
+      readyBtn.fontColor = "white";
       // Hover
-      readyBtn.hoverFillColor = "rgba(11,156,49, 0.8)";
-      readyBtn.hoverFontColor = "white";
+      readyBtn.hoverStrokeColor = "black";
+      readyBtn.hoverFillColor = "white";
+      readyBtn.hoverFontColor = "black";
       readyBtn.hoverCursor = "pointer";
+      // Click
+      readyBtn.clickStrokeColor = "black";
+      readyBtn.clickFillColor = "#eee"
+      readyBtn.clickFontColor = "black";
 
       readyBtn.onMouseEvent("click", () => {
-        player.space?.removeEntity(readyBtn);
+        this.board.removeEntity(readyBtn);
         for (const card of [player.cards[0], player.cards[1]]) {
           if (card?.cardVisible) {
             card.dispatcher.dispatch("click", new MouseEvent("click"));
@@ -359,7 +371,7 @@ export class InGameStep extends GameStep {
           });
       });
 
-      player.space.addEntity(readyBtn);
+      this.board.addEntity(readyBtn);
     }
   }
 
@@ -488,7 +500,7 @@ export class InGameStep extends GameStep {
 
                 // NOT SWITCHING [OK]
               }else {
-                this.messagesService.add("Kobbo", "Vous devez d'abbord sélectionner la carte d'un adversaire", true);
+                this.messagesService.add("Kobbo", "[TIP] Vous devez d'abbord sélectionner la carte d'un adversaire", true);
               }
             }
           }
@@ -524,7 +536,7 @@ export class InGameStep extends GameStep {
                   .then((response: Network.SocketMessage) => {
                     this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
                   });
-                this.messagesService.add("Kobbo", "Si vous voulez échanger la carte, cliquez sur l'une des votre, sinon retournez-la à nouveau pour la laisser au joueur", true);
+                this.messagesService.add("Kobbo", "[TIP] Si vous voulez échanger la carte, cliquez sur l'une des votre, sinon retournez-la à nouveau pour la laisser au joueur", true);
               }
               // WILL NOT SWITCH [OK]
               else {
@@ -551,9 +563,10 @@ export class InGameStep extends GameStep {
   }
 
   initBoard(): void {
+    this.board.addEntity(this.background);
     let spaceSize = {
-      width: this.board.width/3,
-      height: this.board.height/3
+      width: this.gametable.width/3,
+      height: this.gametable.height/3
     };
     this.spacePos = [
       { x: spaceSize.width, y: spaceSize.height*2, deg: 0 },
@@ -574,7 +587,7 @@ export class InGameStep extends GameStep {
       let playerSpace = new Entities.Container(this.spacePos[player.index].x, this.spacePos[player.index].y, spaceSize.width*2, spaceSize.height);
       let background = new Entities.Square(0, 0, playerSpace.width, playerSpace.height, DEBUG ? ["red", "blue", "green", "black"][player.index] : "lightgray", "transparent");
       playerSpace.rotate = this.spacePos[player.index].deg;
-      playerSpace.addEntity(background);
+      //playerSpace.addEntity(background);
       player.space = playerSpace;
       this.gametable.addEntity(playerSpace);
     }
@@ -584,11 +597,25 @@ export class InGameStep extends GameStep {
     this.centerSpace.height = spaceSize.height;
     this.centerSpace.x = spaceSize.width;
     this.centerSpace.y = spaceSize.height;
+    // Stock space
     let stockSpace = new Entities.Container(0, 0, this.centerSpace.width/2, this.centerSpace.height);
+    let stockLabel = new Entities.Label(0, 0, "PIOCHE", this.board.ctx);
+    stockLabel.fontColor = "rgba(0, 0, 0, 0.4)";
+    stockLabel.rotate = this.spacePos[Kobbo.player.index].deg;
+    stockLabel.x = stockSpace.x + stockSpace.width / 2 - stockLabel.width / 2;
+    stockLabel.y = stockSpace.height / 2 - stockLabel.height / 2;
+    // Waste space
     let wasteSpace = new Entities.Container(this.centerSpace.width/2, 0, this.centerSpace.width/2, this.centerSpace.height);
+    let wasteLabel = new Entities.Label(0, 0, "DEFAUSSE", this.board.ctx);
+    wasteLabel.fontColor = "rgba(0, 0, 0, 0.4)";
+    wasteLabel.rotate = this.spacePos[Kobbo.player.index].deg;
+    wasteLabel.x = wasteSpace.x + wasteSpace.width / 2 - wasteLabel.width / 2;
+    wasteLabel.y = wasteSpace.height / 2 - wasteLabel.height / 2;
+
     let background = new Entities.Square(0, 0, spaceSize.width, spaceSize.height,  "lightgray", "transparent");
-    this.centerSpace.addEntity(background);
+    //this.centerSpace.addEntity(background);
     this.centerSpace.addEntities([stockSpace, wasteSpace]);
+    this.centerSpace.addEntities([stockLabel, wasteLabel]);
     this.gametable.addEntity(this.centerSpace);
 
     this.stock.space = stockSpace;
@@ -638,7 +665,7 @@ export class InGameStep extends GameStep {
           this.changeGameState(GameState.USE_POWER);
           // @ts-ignore
           this.messagesService.add("Kobbo", "Vous pouvez utiliser le pouvoir: " + PowersHelp[this.drawnCard.power], true);
-          this.messagesService.add("Kobbo", "Pour ne pas utiliser le pouvoir cliquez à nouveau sur la défausse", true);
+          this.messagesService.add("Kobbo", "[TIP] Pour ne pas utiliser le pouvoir cliquez à nouveau sur la défausse", true);
         }else {
           // @ts-ignore
           this.messagesService.add("Kobbo", player.name + " peut utiliser le pouvoir: " + PowersHelp[this.drawnCard.power], true);
@@ -676,8 +703,8 @@ export class InGameStep extends GameStep {
       this.drawnCard = card;
       card.showCard(true, sensored);
       card.zoom = 2;
-      card.x = this.board.width/2 - card.width/2;
-      card.y = this.board.height/2 - card.height/2;
+      card.x = this.gametable.width/2 - card.width/2;
+      card.y = this.gametable.height/2 - card.height/2;
       card.rotate = (this.playingPlayer === Kobbo.player) ? this.spacePos[Kobbo.player.index].deg * -1 : 0;
       this.gametable.addEntity(card);
     }
@@ -915,7 +942,7 @@ export class InGameStep extends GameStep {
                 }, 1000);
               }, 1000);
             }else {
-              this.messagesService.add("Kobbo", "Vous devez d'abbord sélectionner une de vos cartes");
+              this.messagesService.add("Kobbo", "[TIP] Vous devez d'abbord sélectionner une de vos cartes");
             }
           }
         }

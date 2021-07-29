@@ -1,9 +1,10 @@
-import {Board, Entities, Entity, GameStep, Network} from "@fuwu-yuan/bgew";
+import {Board, Entities, GameStep, Network} from "@fuwu-yuan/bgew";
+import {KobboConfig} from "../game/kobboConfig";
 
 export class JoinGameStep extends GameStep {
   name: string = "joingame";
 
-  private background: HTMLImageElement;
+  private background: Entities.Image;
   private serverCheckTimer = { current: 0, max: 10000 };
   private serverList: Network.Room[] = [];
   private loading: Entities.Label|null = null;
@@ -12,12 +13,11 @@ export class JoinGameStep extends GameStep {
 
   constructor(board: Board) {
     super(board);
-    this.background = new Image();
-    this.background.src = "./assets/images/creategame/background.jpg";
+    this.background = new Entities.Image(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, "./assets/images/background.jpg");
   }
 
   onEnter(data: any): void {
-    let self = this;
+    KobboConfig.setDarkBackground();
 
     this.nickname = data.nickname;
 
@@ -27,17 +27,10 @@ export class JoinGameStep extends GameStep {
     this.gameListLabel = [];
 
     /** Background */
-    let background = new class extends Entity {
-      draw(ctx: CanvasRenderingContext2D): void {
-        super.draw(ctx);
-        this.board?.ctx.drawImage(self.background, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
-      }
-      update(): void {}
-    }(0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
-    this.board.addEntity(background);
+    this.board.addEntity(this.background);
 
     /** Black overlay */
-    let overlay = new Entities.Square(0, 0, this.board.width, this.board.height, "rgba(0,0,0,0.5)", "rgba(0,0,0,0.5)");
+    let overlay = new Entities.Square(0, 0, this.board.width, this.board.height, "transparent", "rgba(0,0,0,0.5)");
     this.board.addEntity(overlay);
 
     /** Title */

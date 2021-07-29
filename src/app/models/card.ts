@@ -34,6 +34,9 @@ export class Card extends Entities.Square {
     this._backRedImage = new Image();
     this._lockedImage = new Image();
     this._image = this.loadImages();
+    this.fillColor = "transparent";
+    this.hoverFillColor = "transparent";
+    this.clickFillColor = "transparent";
     this.strokeColor = "transparent";
     this.hoverStrokeColor = "transparent";
     this.clickStrokeColor = "transparent";

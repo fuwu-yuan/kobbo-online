@@ -1,53 +1,36 @@
 import {Board, Entities, GameStep} from "@fuwu-yuan/bgew";
-import {adjectives, animals, colors, Config, uniqueNamesGenerator} from 'unique-names-generator';
-import { v4 as uuidv4 } from 'uuid';
+import {adjectives, animals, colors, uniqueNamesGenerator} from 'unique-names-generator';
+import {v4 as uuidv4} from 'uuid';
 import {Kobbo} from "../game/Kobbo";
-import {MessagesService} from "../services/messages.service";
+import {KobboConfig} from "../game/kobboConfig";
 
 export class MainStep extends GameStep {
   name: string = "main";
 
+  private background: Entities.Image;
   private onlineLabel: Entities.Label;
   private pingTimer = { current: 0, max: 1000 };
-  private createButton: Entities.Button;
-  private joinButton: Entities.Button;
+  private createButton: Entities.Button = new Entities.Button(0, 0, 0, 0);
+  private joinButton: Entities.Button = new Entities.Button(0, 0, 0, 0);
   private nicknameinput: Entities.ExperimentalInputtext;
   private versionLabel: Entities.Label;
 
   constructor(board: Board) {
     super(board);
 
+    /** Background */
+    this.background = new Entities.Image(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, "./assets/images/background.jpg");
+
     /** Version Label */
     this.versionLabel = new Entities.Label(this.board.width, this.board.height, Kobbo.GAME_NAME + " v" + Kobbo.GAME_VERSION, board.ctx);
     this.versionLabel.fontSize = 12;
     this.versionLabel.x = this.versionLabel.x - this.versionLabel.width - 10;
     this.versionLabel.y = this.versionLabel.y - this.versionLabel.height - 10;
-    this.versionLabel.fontColor = "#555";
+    this.versionLabel.fontColor = "#aaa";
 
     /** Online Label */
     this.onlineLabel = new Entities.Label(board.width - 70, 10, "", board.ctx);
     this.onlineLabel.fontSize = 14;
-
-    let buttonSize = {width: 200, height: 60};
-    /** Create Button */
-    this.createButton = new Button(
-      this.board.config.board.size.width / 4 - buttonSize.width / 2,
-      this.board.config.board.size.height / 2 - buttonSize.height / 2,
-      buttonSize.width,
-      buttonSize.height,
-      "Créer une partie"
-    );
-    this.createButton.onMouseEvent("click", this.createGame.bind(this));
-
-    /** Join Button */
-    this.joinButton = new Button(
-      this.board.config.board.size.width / 4 * 3 - buttonSize.width / 2,
-      this.board.config.board.size.height / 2 - buttonSize.height / 2,
-      buttonSize.width,
-      buttonSize.height,
-      "Rejoindre une partie"
-    );
-    this.joinButton.onMouseEvent("click", this.joinGame.bind(this));
 
     /** Nickname */
     this.nicknameinput = new Entities.ExperimentalInputtext(0, 0, 200, 50);
@@ -59,13 +42,44 @@ export class MainStep extends GameStep {
     var stateObj = { Title : Kobbo.GAME_NAME, Url: urlSplit[0] };
     history.pushState(stateObj, stateObj.Title, stateObj.Url);*/
 
+    KobboConfig.setDarkBackground();
+
     this.pingTimer = { current: 0, max: 1000 };
 
     Kobbo.players = [];
     Kobbo.playerIndex = -1;
 
+    /** Create Button */
+    let buttonSize = {width: 200, height: 60};
+    this.createButton = new Button(
+      this.board.config.board.size.width / 4 - buttonSize.width / 2,
+      this.board.config.board.size.height / 2 - buttonSize.height / 2,
+      buttonSize.width,
+      buttonSize.height,
+      "Créer une partie"
+    );
+    this.createButton.onMouseEvent("click", this.createGame);
+
+    /** Join Button */
+    this.joinButton = new Button(
+      this.board.config.board.size.width / 4 * 3 - buttonSize.width / 2,
+      this.board.config.board.size.height / 2 - buttonSize.height / 2,
+      buttonSize.width,
+      buttonSize.height,
+      "Rejoindre une partie"
+    );
+    this.joinButton.onMouseEvent("click", this.joinGame);
+
+    /** Background */
+    this.board.addEntity(this.background);
+
+    /** Black overlay */
+    let overlay = new Entities.Square(0, 0, this.board.width, this.board.height, "transparent", "rgba(0,0,0,0.5)");
+    this.board.addEntity(overlay);
+
+    /** Server status */
     let onlineLabelPrefix = new Entities.Label(this.board.width - 165, 10, "Le serveur est ", this.board.ctx);
-    onlineLabelPrefix.fontColor = "black";
+    onlineLabelPrefix.fontColor = "#aaa";
     onlineLabelPrefix.fontSize = 14;
 
     /** Add nickname input */
@@ -76,15 +90,20 @@ export class MainStep extends GameStep {
     this.nicknameinput.strokeColor = "black";
     this.nicknameinput.placeholder = "Nickname";
     this.nicknameinput.fontColor = "black";
-    this.nicknameinput.text = uniqueNamesGenerator({
+    this.nicknameinput.padding = { top: 0, bottom: 0, left: 5, right: 5 };
+    if (KobboConfig.cookieService.hasKey("nickname")) {
+      this.nicknameinput.text = KobboConfig.cookieService.get("nickname");
+    }
+    /*this.nicknameinput.text = uniqueNamesGenerator({
       dictionaries: [colors, animals],
       separator: '',
       length: 2,
       style: "capital"
-    });
-    let nicknameLabel = new Entities.Label(this.nicknameinput.x, this.nicknameinput.y, "Your nickname", this.board.ctx);
+    });*/
+    let nicknameLabel = new Entities.Label(this.nicknameinput.x, this.nicknameinput.y, "Pseudo du joueur", this.board.ctx);
+    nicknameLabel.x = this.nicknameinput.x + this.nicknameinput.width / 2 - nicknameLabel.width / 2
     nicknameLabel.y = nicknameLabel.y - nicknameLabel.height - 10;
-    nicknameLabel.fontColor = "black";
+    nicknameLabel.fontColor = "white";
     this.board.addEntity(nicknameLabel);
     this.board.addEntity(this.nicknameinput);
 
@@ -95,7 +114,8 @@ export class MainStep extends GameStep {
     this.board.addEntity(this.versionLabel);
   }
 
-  createGame() {
+  createGame = () => {
+    KobboConfig.cookieService.put("nickname", this.nicknameinput.text);
     console.log("Creating game !");
     let defaultName: string = uniqueNamesGenerator({
       dictionaries: [adjectives, colors, animals],
@@ -117,13 +137,13 @@ export class MainStep extends GameStep {
     }
   }
 
-  joinGame() {
+  joinGame = () => {
+    KobboConfig.cookieService.put("nickname", this.nicknameinput.text);
     console.log("Joining Game !");
     this.board.moveToStep("joingame", {nickname: this.nicknameinput.text});
   }
 
   onLeave(): void {
-
   }
 
   update(delta: number) {
@@ -132,6 +152,8 @@ export class MainStep extends GameStep {
       this.pingTimer.current = 0;
       this.ping();
     }
+
+    this.createButton.disabled = this.joinButton.disabled = this.nicknameinput.text === "";
 
     super.update(delta);
   }
@@ -167,16 +189,16 @@ class Button extends Entities.Button {
   constructor(x: number, y: number, width: number, height: number, text: string = "") {
     super(x, y, width, height, text);
     // Normal
-    this.strokeColor = "rgba(230,77,59, 1.0)";
-    this.fontColor = "rgba(230,77,59, 1.0)";
+    this.strokeColor = "white";
+    this.fontColor = "white";
     // Hover
-    this.hoverFillColor = "rgba(230,77,59, 1.0)";
-    this.hoverFontColor = "white";
+    this.hoverFillColor = "white";
+    this.hoverFontColor = "black";
     this.hoverCursor = "pointer";
     // Clicked
-    this.clickStrokeColor = "rgba(230,37,39, 1.0)";
-    this.clickFillColor = "rgba(230,37,39, 1.0)";
-    this.clickFontColor = "white";
+    this.clickStrokeColor = "lightgray";
+    this.clickFillColor = "lightgray";
+    this.clickFontColor = "black";
     // Disabled
     this.disabledStrokeColor = "darkgray";
     this.disabledFontColor = "darkgray";

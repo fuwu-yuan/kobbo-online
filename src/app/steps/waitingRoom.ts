@@ -1,20 +1,23 @@
 import {Player} from "../models/player";
-import {Board, Entity, GameStep, Network, Entities} from "@fuwu-yuan/bgew";
+import {Board, Entities, GameStep, Network} from "@fuwu-yuan/bgew";
 import {Kobbo} from "../game/Kobbo";
 import {MessagesService} from "../services/messages.service";
+import {KobboConfig} from "../game/kobboConfig";
 
 const GAME_START_TIMER = 5; //seconds
+const GAMETABLE_PADDING = 64;
 
 export class WaitingRoomStep extends GameStep {
   name: string = "waitingroom";
 
-  private background: HTMLImageElement;
+  private background: Entities.Image;
   private images: HTMLImageElement[] = [];
   private imagesEntities: any[] = [null, null, null, null];
 
   private startButton: Entities.Button|null = null;
   private readyButton: Entities.Button|null = null;
-  private readyPlayersLabel: Entities.Label|null = null;
+
+  private playerNicknames: Entities.Label[] = [];
 
   private messagesService;
 
@@ -23,40 +26,28 @@ export class WaitingRoomStep extends GameStep {
 
   constructor(board: Board) {
     super(board);
-    this.background = new Image();
-    this.background.src = "./assets/images/creategame/background.jpg";
-    let cardsP1 = new Image();
-    //cardsP1.src = "/assets/images/creategame/p1.png";
-    this.images.push(cardsP1);
-    let cardsP2 = new Image();
-    //cardsP2.src = "/assets/images/creategame/p2.png";
-    this.images.push(cardsP2);
-    let cardsP3 = new Image();
-    //cardsP3.src = "/assets/images/creategame/p3.png";
-    this.images.push(cardsP3);
-    let cardsP4 = new Image();
-    //cardsP4.src = "/assets/images/creategame/p4.png";
-    this.images.push(cardsP4);
-
+    this.background = new Entities.Image(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, "./assets/images/background.jpg");
     this.messagesService = MessagesService.getInstance();
+
+    for (let i = 0; i < 4; i++) {
+      this.playerNicknames.push(new Entities.Label(0, 0, "", board.ctx));
+    }
   }
 
   onEnter(data: any): void {
-    this.readyPlayersLabel = new Entities.Label(10, 10, "", this.board.ctx);
+    KobboConfig.setDarkBackground();
     console.log("Enter: ", data);
     this.data = data;
     const self = this;
 
     /** Add background */
-    let background = new class extends Entity {
-      draw(ctx: CanvasRenderingContext2D): void {
-        super.draw(ctx);
-        this.board?.ctx.drawImage(self.background, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
-      }
-      update(): void {}
-    }(0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
-    this.board.addEntity(background);
-    this.board.addEntity(this.readyPlayersLabel);
+    this.board.addEntity(this.background);
+    /** Black overlay */
+    let overlay = new Entities.Square(0, 0, this.board.width, this.board.height, "transparent", "rgba(0,0,0,0.5)");
+    this.board.addEntity(overlay);
+
+
+    this.board.addEntities(this.playerNicknames);
 
     /** Set game URL */
     /*var url = window.location.href;
@@ -121,14 +112,17 @@ export class WaitingRoomStep extends GameStep {
       size.width,
       size.height
     );
-    button.strokeColor = "black";
-    button.fillColor = "white";
-    button.fontColor = "black";
-    button.hoverStrokeColor = "white";
-    button.hoverFillColor = "black";
-    button.hoverFontColor = "white";
-    button.clickFillColor = "darkgray";
+    button.strokeColor = "white";
+    button.fontColor = "white";
+    // Hover
+    button.hoverStrokeColor = "black";
+    button.hoverFillColor = "white";
+    button.hoverFontColor = "black";
     button.hoverCursor = "pointer";
+    // Click
+    button.clickStrokeColor = "black";
+    button.clickFillColor = "#eee"
+    button.clickFontColor = "black";
     if (Kobbo.player.isHost) {
       this.startButton = Object.create(button) as Entities.Button;
       this.startButton.text = "En attente des autres joueurs";
@@ -294,23 +288,7 @@ export class WaitingRoomStep extends GameStep {
 
   addPlayer(player: Player): Player {
     console.log("Adding new player: " + player.uid);
-    let self = this;
     Kobbo.players.push(player);
-    let entity = new class extends Entity {
-      private readonly image;
-      constructor(x: number, y: number, width: number, height: number, image: HTMLImageElement) {
-        super(x, y, width, height);
-        this.image = image;
-      }
-      draw(ctx: CanvasRenderingContext2D): void {
-        super.draw(ctx);
-        this.board?.ctx.drawImage(this.image, 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
-      }
-      update(): void {}
-    }(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, self.images[player.index]);
-    this.imagesEntities[player.index] = entity;
-    this.board.addEntity(entity);
-
     return player;
   }
 
@@ -326,14 +304,29 @@ export class WaitingRoomStep extends GameStep {
   }
 
   private updatePlayersReadyLabel() {
-    if (this.readyPlayersLabel) {
-      this.readyPlayersLabel.text = "";
-      let players = Kobbo.players.sort((p1: Player, p2: Player) => {
-        return p1.index - p2.index;
-      })
-      for (let i = 0; i < players.length; i++) {
-        this.readyPlayersLabel.text = this.readyPlayersLabel.text + (players[i].ready ? "✅ " : "❌ ") + players[i].name + "\n\n";
+    let players = Kobbo.sortedPlayers();
+    let labelPos = [
+      { x: this.board.width / 2/* - label.width / 2*/, y: this.board.height - GAMETABLE_PADDING / 2 /* - label.height / 2*/, deg: 0 },
+      { x: GAMETABLE_PADDING / 2/* - label.width / 2*/, y: this.board.height / 2/* - label.height / 2*/, deg: 270 },
+      { x: this.board.width / 2/* - label.width / 2*/, y: GAMETABLE_PADDING / 2/* - label.height / 2*/, deg: 0 },
+      { x: this.board.width - GAMETABLE_PADDING / 2/* - label.width / 2*/, y: this.board.height / 2/* - label.height / 2*/, deg: 90 }
+    ];
+
+    if (players.length === 2) {
+      labelPos = [labelPos[0], labelPos[2], labelPos[1], labelPos[3]];
+    }
+    for (let i = 0; i < this.playerNicknames.length; i++) {
+      let label = this.playerNicknames[i];
+      if (typeof players[i] !== "undefined") {
+        label.text = (players[i].ready ? "✅ " : "❌ ") + players[i].name;
+        label.fontColor = "white";
+      }else {
+        label.text = "En attente d'un joueur";
+        label.fontColor = "gray";
       }
+      label.x = labelPos[i].x - label.width / 2;
+      label.y = labelPos[i].y - label.height / 2;
+      label.rotate = labelPos[i].deg;
     }
   }
 

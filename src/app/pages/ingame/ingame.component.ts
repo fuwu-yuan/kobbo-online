@@ -11,6 +11,8 @@ import {ActivatedRoute} from '@angular/router';
 import {animals, colors, uniqueNamesGenerator} from "unique-names-generator";
 import {DomSanitizer} from "@angular/platform-browser";
 import {MessagesService} from "../../services/messages.service";
+import {CookieService} from "ngx-cookie";
+import {KobboConfig} from "../../game/kobboConfig";
 
 @Component({
   selector: 'app-ingame',
@@ -25,7 +27,12 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
   board: Board|null = null;
   scale: number = 1;
 
-  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer) {
+  constructor(
+    private route: ActivatedRoute,
+    private sanitizer: DomSanitizer,
+    private cookieService: CookieService
+  ) {
+    KobboConfig.cookieService = cookieService;
     var ua = navigator.userAgent;
 
     if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua)) {
@@ -33,6 +40,13 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
     }
     console.log(this.isDesktop ? "Desktop" : "Mobile");
     Kobbo.GAME_VERSION = version;
+  }
+
+  @HostListener("window:beforeunload", ["$event"])
+  unloadHandler(event: Event) {
+    if (this.board && this.board.step.name === "ingame") {
+      event.returnValue = false; // stay on same page
+    }
   }
 
   @HostListener('window:resize', ['$event'])
