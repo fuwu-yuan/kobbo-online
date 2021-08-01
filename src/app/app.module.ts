@@ -8,11 +8,16 @@ import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
 import {HttpClientModule} from '@angular/common/http';
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {CookieModule} from "ngx-cookie";
+import { RulesComponent } from './pages/rules/rules.component';
+import { HelpComponent } from './pages/help/help.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
     AppComponent,
-    IngameComponent
+    IngameComponent,
+    RulesComponent,
+    HelpComponent
   ],
   imports: [
     BrowserModule,
@@ -20,7 +25,8 @@ import {CookieModule} from "ngx-cookie";
     LoggerModule.forRoot({serverLoggingUrl: '/api/logs', level: NgxLoggerLevel.DEBUG, serverLogLevel: NgxLoggerLevel.ERROR}),
     HttpClientModule,
     FontAwesomeModule,
-    CookieModule.forRoot()
+    CookieModule.forRoot(),
+    NgbModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,0 +1,153 @@
+<div class="container">
+  <h1>Règles</h1>
+
+  <p>Kobbo est un jeu de cartes multi-joueur qui allie réflexion, stratégie et rapidité.</p>
+
+  <h2>Début de partie</h2>
+
+  <p>Le jeu distribue 4 cartes par joueur qui sont disposées en carré face cachées.</p>
+  <p>
+    <ngb-alert type="warning" [dismissible]="false">
+      <strong>Attention!</strong> Quand le joueur clique sur "Prêt" ses cartes sont automatiquement retournées face cachée et il ne peut plus les regarder
+    </ngb-alert>
+  </p>
+
+  <p>Quand tous les joueurs ont cliqué sur "Prêt" la partie commence et le premier joueur prend la main.</p>
+
+  <h2>Déroulement de la partie</h2>
+
+  <p>Les joueurs jouent à tour de rôle dans le sens des éguilles d'une montre.</p>
+  <p>Le premier joueur prend une carte dans la pioche en cliqant dessus et regarde la carte, puis 2 choix s'offrent à lui :</p>
+  <ol>
+    <li>Le joueur remplace une des cartes de son jeu par celle piochée en cliquant dessus, et la carte remplacée se retrouve dans la défausse face visible</li>
+    <li>Le joueur clique sur la défausse pour jeter la carte qu'il vient de piocher et dans ce cas si la carte à un pouvoir il peut l'utiliser</li>
+  </ol>
+  <p>
+    <ngb-alert type="info" [dismissible]="false">
+      Vous avez le droit d'utiliser un pouvoir uniquement si vous avez directement jeté la carte piochée.
+    </ngb-alert>
+  </p>
+
+  <p>Puis c'est au tour du joueur suivant qui procède de la même manière.</p>
+
+  <h2>Les pouvoirs</h2>
+
+  <div>
+    <img height="60" src="./assets/images/cards/cardSpades7.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardClubs7.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardDiamonds7.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardHearts7.png"> Regarder une de vos cartes
+  </div>
+
+  <div>
+    <img height="60" src="./assets/images/cards/cardSpades8.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardClubs8.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardDiamonds8.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardHearts8.png"> Regarder une de vos cartes
+  </div>
+
+  <div>
+    <img height="60" src="./assets/images/cards/cardSpades9.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardClubs9.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardDiamonds9.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardHearts9.png"> Regarder la carte d'un autre joueur
+  </div>
+
+  <div>
+    <img height="60" src="./assets/images/cards/cardSpades10.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardClubs10.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardDiamonds10.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardHearts10.png"> Regarder la carte d'un autre joueur
+  </div>
+
+  <div>
+    <img height="60" src="./assets/images/cards/cardSpadesJ.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardClubsJ.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardDiamondsJ.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardHeartsJ.png"> Échanger une de vos cartes avec celle d'un autre joueur à l'aveugle
+  </div>
+
+  <div>
+    <img height="60" src="./assets/images/cards/cardSpadesQ.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardClubsQ.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardDiamondsQ.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardHeartsQ.png"> Échanger une de vos cartes avec celle d'un autre joueur à l'aveugle
+  </div>
+
+  <div>
+    <img height="60" src="./assets/images/cards/cardDiamondsK.png">&nbsp;<!--
+  --><img height="60" src="./assets/images/cards/cardHeartsK.png"> Regarder la carte d'un autre joeuur et l'échanger avec l'une de ses cartes si envie
+  </div>
+  <br>
+  <h2>Défausse rapide</h2>
+
+  <p>Lorsqu'un joueur pense avoir une carte de la même valeur (on ignore la couleur) que la carte que se situe sur le dessus de la défausse il peut se défausser de sa carte en double cliquant dessus.</p>
+  <ul>
+    <li>Si la carte est bien de la même valeur, le joueur qui la jeté se retrouve avec une carte de moins dans son jeu</li>
+    <li>Si la carte n'est pas de la bonne valeur, le joueur récupère sa carte, puis reçois une nouvelle carte en malus qui est disposé à la suite de son jeu face cachée</li>
+  </ul>
+  <p>
+    <ngb-alert type="info" [dismissible]="false">
+      Si plusieurs joueurs font une défausse rapide en même temps, c'est le plus rapide qui l'emporte. Les autres récupèrent leur carte automatiquement.
+    </ngb-alert>
+  </p>
+
+  <h2>Fin de la partie</h2>
+
+  <p>Lorsque qu'un joueur pense avoir moins de points que les autre joueurs dans son jeu (et une valeur totale inférieur à 5), il attend son tour puis clique sur le bouton "Kobbo", pour l'annoncer.</p>
+  <p>Au bout de 5 secondes son jeu est révélé.</p>
+  <p>Si le joueur à bien moins de 5 points et un score inférieur aux autres joueurs, il remporte la partie.</p>
+
+  <h2>Valeur des cartes</h2>
+
+  <div class="row">
+    <div class="col-md-4 text-center">
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHeartsA.png"><span class="h2 align-middle ml-2">1</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts2.png"><span class="h2 align-middle ml-2">2</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts3.png"><span class="h2 align-middle ml-2">3</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts4.png"><span class="h2 align-middle ml-2">4</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts5.png"><span class="h2 align-middle ml-2">5</span>
+      </div>
+    </div>
+    <div class="col-md-4 text-center">
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts6.png"><span class="h2 align-middle ml-2">6</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts7.png"><span class="h2 align-middle ml-2">7</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts8.png"><span class="h2 align-middle ml-2">8</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts9.png"><span class="h2 align-middle ml-2">9</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHearts10.png"><span class="h2 align-middle ml-2">10</span>
+      </div>
+    </div>
+    <div class="col-md-4 text-center">
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHeartsJ.png"><span class="h2 align-middle ml-2">11</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHeartsQ.png"><span class="h2 align-middle ml-2">12</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardHeartsK.png"><img height="60" src="./assets/images/cards/cardDiamondsK.png"><span class="h2 align-middle ml-2">15</span>
+      </div>
+      <div class="mb-3">
+        <img height="60" src="./assets/images/cards/cardClubsK.png"><img height="60" src="./assets/images/cards/cardSpadesK.png"><span class="h2 align-middle ml-2">0</span>
+      </div>
+    </div>
+  </div>
+</div>

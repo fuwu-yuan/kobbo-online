@@ -1,4 +1,12 @@
-import {AfterContentInit, AfterViewInit, Component, HostListener, OnInit} from '@angular/core';
+import {
+  AfterContentInit,
+  AfterViewInit,
+  Component,
+  ContentChild,
+  HostListener,
+  OnInit,
+  TemplateRef
+} from '@angular/core';
 import {MainStep} from "../../steps/main";
 import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
@@ -13,6 +21,7 @@ import {DomSanitizer} from "@angular/platform-browser";
 import {MessagesService} from "../../services/messages.service";
 import {CookieService} from "ngx-cookie";
 import {KobboConfig} from "../../game/kobboConfig";
+import {NgbModal, NgbModalConfig, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-ingame',
@@ -30,7 +39,8 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
   constructor(
     private route: ActivatedRoute,
     private sanitizer: DomSanitizer,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    private modalService: NgbModal,
   ) {
     KobboConfig.cookieService = cookieService;
     var ua = navigator.userAgent;
@@ -145,5 +155,14 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
       -moz-transform:  scale(${this.scale},${this.scale});
       -moz-transform-Origin: left top;
     `);
+  }
+
+  openModal(modal: any) {
+    this.modalService.open(modal, {
+      backdropClass: 'light-blue-backdrop',
+      size: 'xl',
+      centered: true,
+      windowClass: "big-modal"
+    });
   }
 }

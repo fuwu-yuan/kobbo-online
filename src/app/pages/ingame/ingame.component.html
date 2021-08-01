@@ -1,4 +1,8 @@
 <div *ngIf="isDesktop" class="game-container">
+  <div class="buttons">
+    <button type="button" class="btn btn-outline-light" (click)="openModal(rulesmodal)">Règles</button>
+    <button type="button" class="btn btn-outline-light" (click)="openModal(helpmodal)">Aide</button>
+  </div>
   <div id="game"></div>
   <div id="chat">
     <h2>Messagerie</h2>
@@ -12,3 +16,21 @@
 <div *ngIf="!isDesktop" class="not-optimized-mobile">
   Cette application n'est pas optimisée pour mobile ou tablette.
 </div>
+
+<ng-template #rulesmodal let-modal>
+  <div class="modal-body">
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <iframe style="width: 100%;height:100%;" src="/rules" class="embed-responsive-item" frameborder="0"></iframe>
+  </div>
+</ng-template>
+
+<ng-template #helpmodal let-modal>
+  <div class="modal-body">
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <iframe style="width: 100%;height:100%;" src="/help" class="embed-responsive-item" frameborder="0"></iframe>
+  </div>
+</ng-template>

@@ -1,4 +1,4 @@
-.container {
+.page-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -18,7 +18,7 @@ h2, h3 {
 footer{
   margin-top: auto;
   background: #2880B8;
-  width: calc(100% - 20px);
+  width: 100%;
   padding: 20px 10px;
   color: white;
   text-align: center;
