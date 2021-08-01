@@ -69,7 +69,9 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
     this.scale = Math.round(wh / this.boardDefaultSize * 100)/100;
     if (this.board) {
       this.board.scale = this.scale;
-      MessagesService.getInstance().scale(this.board.scale);
+      if (this.isDesktop) {
+        MessagesService.getInstance().scale(this.board.scale);
+      }
     }
   }
 
@@ -81,12 +83,14 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
   }
 
   ngAfterViewInit(): void {
-    if (this.isDesktop) {
+    //if (this.isDesktop) {
       let gameElem = document.getElementById("game");
       console.log(gameElem);
       this.board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, this.boardDefaultSize, this.boardDefaultSize, gameElem);
       this.board.scale = this.scale;
-      MessagesService.getInstance().scale(this.board.scale);
+      if (this.isDesktop) {
+        MessagesService.getInstance().scale(this.board.scale);
+      }
       if(!environment.production) {
         console.log("APP IS IN DEV MODE");
         this.board.networkManager = new class extends Network.NetworkManager {
@@ -102,7 +106,7 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
 
       /* Check short game access */
       this.checkShortGameAccess();
-    }
+    //}
   }
 
   initSteps(board: Board) {
@@ -164,5 +168,28 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
       centered: true,
       windowClass: "big-modal"
     });
+  }
+
+  closeChat() {
+    let chat = document.getElementById("chat");
+    if (chat) {
+      chat.style.display = "none";
+    }
+  }
+
+  openChat() {
+    let chat = document.getElementById("chat");
+    if (chat) {
+      chat.style.display = "block";
+    }
+  }
+
+  canShowChat() {
+    let res = false;
+    let chat = document.getElementById("chat");
+    if (chat) {
+      res = chat.classList.contains("show");
+    }
+    return res;
   }
 }

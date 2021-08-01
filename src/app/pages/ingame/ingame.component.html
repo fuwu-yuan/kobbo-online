@@ -1,10 +1,12 @@
-<div *ngIf="isDesktop" class="game-container">
+<div class="game-container">
   <div class="buttons">
     <button type="button" class="btn btn-outline-light" (click)="openModal(rulesmodal)">Règles</button>
     <button type="button" class="btn btn-outline-light" (click)="openModal(helpmodal)">Aide</button>
+    <button [hidden]="!canShowChat() && !isDesktop" type="button" class="btn btn-outline-light" (click)="openChat()">Chat</button>
   </div>
   <div id="game"></div>
   <div id="chat">
+    <span class="cross" *ngIf="!isDesktop" (click)="closeChat()">x</span>
     <h2>Messagerie</h2>
     <div class="messages"></div>
     <input name="msg" placeholder="Discutez ici">
@@ -13,9 +15,9 @@
     <h2>DEBUG</h2>
   </div>
 </div>
-<div *ngIf="!isDesktop" class="not-optimized-mobile">
+<!--<div *ngIf="!isDesktop" class="not-optimized-mobile">
   Cette application n'est pas optimisée pour mobile ou tablette.
-</div>
+</div>-->
 
 <ng-template #rulesmodal let-modal>
   <div class="modal-body">
