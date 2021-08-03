@@ -2,7 +2,7 @@
   <div class="buttons">
     <button type="button" class="btn btn-outline-light" (click)="openModal(rulesmodal)">Règles</button>
     <button type="button" class="btn btn-outline-light" (click)="openModal(helpmodal)">Aide</button>
-    <button [hidden]="!canShowChat() && !isDesktop" type="button" class="btn btn-outline-light" (click)="openChat()">Chat</button>
+    <button [hidden]="!canShowChat() || isDesktop" type="button" class="btn btn-outline-light" (click)="openChat()">Chat</button>
   </div>
   <div id="game"></div>
   <div id="chat">

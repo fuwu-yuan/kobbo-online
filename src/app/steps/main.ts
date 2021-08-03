@@ -153,7 +153,10 @@ export class MainStep extends GameStep {
       this.ping();
     }
 
-    this.createButton.disabled = this.joinButton.disabled = this.nicknameinput.text === "";
+    if (this.nicknameinput.text === "") {
+      this.createButton.disabled = true;
+      this.joinButton.disabled = true;
+    }
 
     super.update(delta);
   }
@@ -161,8 +164,10 @@ export class MainStep extends GameStep {
   online() {
     this.onlineLabel.fontColor = "green";
     this.onlineLabel.text = "en ligne";
-    this.createButton.disabled = false;
-    this.joinButton.disabled = false;
+    if (this.nicknameinput.text !== "") {
+      this.createButton.disabled = false;
+      this.joinButton.disabled = false;
+    }
   }
 
   offline() {
