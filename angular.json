@@ -20,6 +20,9 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "baseHref": "/kobbo-online/",
+            "deployUrl": "/kobbo-online/",
+            "showCircularDependencies": false,
             "outputPath": "dist/Kobbo",
             "index": "src/index.html",
             "main": "src/main.ts",

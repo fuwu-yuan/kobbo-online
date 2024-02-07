@@ -4,6 +4,7 @@ import {Entities} from "@fuwu-yuan/bgew";
 
 export class Kobbo {
 
+  public static ip = "";
   public static playerIndex = -1;
   public static players: Player[] = [];
   public static player: Player;

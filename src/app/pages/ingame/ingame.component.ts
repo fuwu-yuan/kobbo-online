@@ -1,12 +1,4 @@
-import {
-  AfterContentInit,
-  AfterViewInit,
-  Component,
-  ContentChild,
-  HostListener,
-  OnInit,
-  TemplateRef
-} from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, HostListener, OnInit} from '@angular/core';
 import {MainStep} from "../../steps/main";
 import {WaitingRoomStep} from "../../steps/waitingRoom";
 import {JoinGameStep} from "../../steps/joinGame";
@@ -21,31 +13,39 @@ import {DomSanitizer} from "@angular/platform-browser";
 import {MessagesService} from "../../services/messages.service";
 import {CookieService} from "ngx-cookie";
 import {KobboConfig} from "../../game/kobboConfig";
-import {NgbModal, NgbModalConfig, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import { HttpClient  } from '@angular/common/http';
 
 @Component({
   selector: 'app-ingame',
   templateUrl: './ingame.component.html',
   styleUrls: ['./ingame.component.scss']
 })
-export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
+export class IngameComponent implements AfterViewInit,AfterContentInit {
 
   isDesktop: boolean = true;
   screenSize: {width: number, height: number} = {height: 0, width: 0};
   boardDefaultSize: number = 900;
   board: Board|null = null;
   scale: number = 1;
+  logger = console.log;
 
   constructor(
     private route: ActivatedRoute,
     private sanitizer: DomSanitizer,
     private cookieService: CookieService,
     private modalService: NgbModal,
+    private http: HttpClient
   ) {
+    if (environment.production) {
+      console.log("Log are disabled");
+      console.log = () => {};
+      this.toggleLogs();
+    }
     KobboConfig.cookieService = cookieService;
     var ua = navigator.userAgent;
 
-    if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua)) {
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua)) {
       this.isDesktop = false;
     }
     console.log(this.isDesktop ? "Desktop" : "Mobile");
@@ -75,7 +75,16 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
     }
   }
 
-  ngOnInit(): void {
+  toggleLogs(): void {
+    /* Désactivation des logs si l'ip n'est pas admin */
+    this.getIPAddress().then((ip: string) => {
+      if (environment.admin_ips.indexOf(ip) > -1) {
+        console.log = this.logger;
+        console.log("IP is allowed, logs enabled");
+      }
+    }).catch(() => {
+      console.log = () => {};
+    });
   }
 
   ngAfterContentInit(): void {
@@ -84,28 +93,30 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
 
   ngAfterViewInit(): void {
     //if (this.isDesktop) {
-      let gameElem = document.getElementById("game");
-      console.log(gameElem);
-      this.board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, this.boardDefaultSize, this.boardDefaultSize, gameElem);
-      this.board.scale = this.scale;
-      if (this.isDesktop) {
-        MessagesService.getInstance().scale(this.board.scale);
-      }
-      if(!environment.production) {
-        console.log("APP IS IN DEV MODE");
-        this.board.networkManager = new class extends Network.NetworkManager {
-          get apiUrl(): string { return "http://127.0.0.1:8081/api"; }
-          get wsUrl(): string { return "ws://127.0.0.1:8081/"; }
-        }(this.board);
-      }
-      //this.board.networkManager = new JulienGameServer(this.board);
+    let gameElem = document.getElementById("game");
+    this.board = new Board(Kobbo.GAME_NAME, Kobbo.GAME_VERSION, this.boardDefaultSize, this.boardDefaultSize, gameElem, "transparent", false, false);
+    this.board.scale = this.scale;
+    if (this.isDesktop) {
+      MessagesService.getInstance().scale(this.board.scale);
+    }
+    if(!environment.production) {
+      console.log("APP IS IN DEV MODE");
+      this.board.networkManager = new class extends Network.NetworkManager {
+        get apiUrl(): string { return "http://127.0.0.1:8081/api"; }
+        get wsUrl(): string { return "ws://127.0.0.1:8081/"; }
+      }(this.board);
+    }
+    //this.board.networkManager = new JulienGameServer(this.board);
+    setInterval(() => {
+      this.board?.networkManager.ping();
+    }, 10000);
 
       /* Init and start board */
       this.initSteps(this.board);
-      this.board.start();
+    this.board.start();
 
-      /* Check short game access */
-      this.checkShortGameAccess();
+    /* Check short game access */
+    this.checkShortGameAccess();
     //}
   }
 
@@ -191,5 +202,17 @@ export class IngameComponent implements OnInit,AfterViewInit,AfterContentInit {
       res = chat.classList.contains("show");
     }
     return res;
+  }
+
+  getIPAddress(): Promise<string>
+  {
+    return new Promise<string>((resolve, reject) => {
+      this.http.get("http://api.ipify.org/?format=json").subscribe((res:any)=> {
+        Kobbo.ip = res.ip;
+        resolve(res.ip);
+      }, (err) => {
+        reject();
+      });
+    });
   }
 }

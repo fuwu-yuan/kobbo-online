@@ -52,7 +52,7 @@ export class InGameStep extends GameStep {
 
   constructor(board: Board) {
     super(board);
-    this.background = new Entities.Image(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, "./assets/images/background.jpg");
+    this.background = new Entities.Image("./assets/images/background.jpg", 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
     this.stock = new Stock();
     this.waste = new Waste();
     this.randomseed = randomseed();
@@ -133,16 +133,13 @@ export class InGameStep extends GameStep {
 
   test(): void {
     // Carré seul
-    let squareOnly = new Entities.Square(100, 100, 200, 200, "blue", "blue", "green", "green");
+    let squareOnly = new Entities.Rectangle(100, 100, 200, 200, "blue", "blue", "green", "green");
     this.board.addEntity(squareOnly);
-    let squareContainer = new Entities.Container(0, 0, 200, 200);
-    squareContainer.translate = {x: 300, y: 300};
+    let squareContainer = new Entities.Container(300, 300, 200, 200);
     squareContainer.rotate = 90;
-    let innerContainer = new Entities.Container(0, 0, 100, 100);
-    innerContainer.translate = {x: 10, y: 10};
+    let innerContainer = new Entities.Container(10, 10, 100, 100);
     innerContainer.rotate = 90;
-    let innerSquare = new Entities.Square(0, 0, 60, 60, "blue", "blue", "green", "green");
-    innerSquare.translate = {x: 5, y: 5};
+    let innerSquare = new Entities.Rectangle(5, 5, 60, 60, "blue", "blue", "green", "green");
     innerSquare.rotate = 90;
     squareContainer.addEntity(innerContainer);
     innerContainer.addEntity(innerSquare);
@@ -159,8 +156,7 @@ export class InGameStep extends GameStep {
       height: this.gametable.height/3
     };
     let pos = { x: spaceSize.width, y: spaceSize.height*2, deg: 0 };
-    let parent = new Entities.Container(pos.x, pos.y, spaceSize.width, spaceSize.height);
-    parent.translate = { x: spaceSize.width, y: 0 };
+    let parent = new Entities.Container(pos.x + spaceSize.width, pos.y, spaceSize.width, spaceSize.height);
     parent.rotate = 180;
     let card = new Card(Names.$KING, Colors.DIAMONDS);
     card.x = 0;
@@ -585,7 +581,7 @@ export class InGameStep extends GameStep {
     /* Add players */
     for (const player of Kobbo.sortedPlayers()) {
       let playerSpace = new Entities.Container(this.spacePos[player.index].x, this.spacePos[player.index].y, spaceSize.width*2, spaceSize.height);
-      let background = new Entities.Square(0, 0, playerSpace.width, playerSpace.height, DEBUG ? ["red", "blue", "green", "black"][player.index] : "lightgray", "transparent");
+      let background = new Entities.Rectangle(0, 0, playerSpace.width, playerSpace.height, DEBUG ? ["red", "blue", "green", "black"][player.index] : "lightgray", "transparent");
       playerSpace.rotate = this.spacePos[player.index].deg;
       //playerSpace.addEntity(background);
       player.space = playerSpace;
@@ -612,7 +608,7 @@ export class InGameStep extends GameStep {
     wasteLabel.x = wasteSpace.x + wasteSpace.width / 2 - wasteLabel.width / 2;
     wasteLabel.y = wasteSpace.height / 2 - wasteLabel.height / 2;
 
-    let background = new Entities.Square(0, 0, spaceSize.width, spaceSize.height,  "lightgray", "transparent");
+    let background = new Entities.Rectangle(0, 0, spaceSize.width, spaceSize.height,  "lightgray", "transparent");
     //this.centerSpace.addEntity(background);
     this.centerSpace.addEntities([stockSpace, wasteSpace]);
     this.centerSpace.addEntities([stockLabel, wasteLabel]);
@@ -683,12 +679,19 @@ export class InGameStep extends GameStep {
 
   replaceCardByDrawn(player: Player, card: Card): Promise<void> {
     return new Promise<void>((resolve) => {
+      console.log("test41");
       if (this.drawnCard) {
+        console.log("test42");
         let i = player.removeCard(card);
+        console.log("test43");
         this.sendToWaste(card);
+        console.log("test44");
         player.giveCard(this.drawnCard, i);
+        console.log("test45");
         this.gametable.removeEntity(this.drawnCard);
+        console.log("test46");
         this.drawnCard.showCard(true, player !== Kobbo.player);
+        console.log("test47");
         setTimeout(() => {
           this.drawnCard?.showCard(false);
           resolve();
@@ -843,12 +846,19 @@ export class InGameStep extends GameStep {
     else if (event === "take_drawn_card") {
       this.changeGameState(GameState.WAIT);
       let player = Kobbo.findPlayerByUid(data.player);
+      console.log("test1");
       if (player) {
+        console.log("test2");
         let replacedCard = player.getCardAt(data.replacedCard);
+        console.log("test3");
         if (replacedCard) {
+          console.log("test4");
           this.replaceCardByDrawn(player, replacedCard).then(() => {
+            console.log("test5");
             if (this.serverSide) {
+              console.log("test6");
               this.serverSide.nextPlayer().then((response: Network.SocketMessage) => {
+                console.log("test7");
                 this.onGameEvent(response.data.msg.msg.event, response.data.msg.msg.data);
               });
             }

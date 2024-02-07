@@ -3,7 +3,7 @@ import {KobboConfig} from "../game/kobboConfig";
 import {Player} from "./player";
 import {Stock} from "./stock";
 
-export class Card extends Entities.Square {
+export class Card extends Entities.Rectangle {
 
   private _value;
   private _power;

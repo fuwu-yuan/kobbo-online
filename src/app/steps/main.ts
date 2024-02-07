@@ -9,17 +9,17 @@ export class MainStep extends GameStep {
 
   private background: Entities.Image;
   private onlineLabel: Entities.Label;
-  private pingTimer = { current: 0, max: 1000 };
+  private pingTimer = { current: 0, max: 10000 };
   private createButton: Entities.Button = new Entities.Button(0, 0, 0, 0);
   private joinButton: Entities.Button = new Entities.Button(0, 0, 0, 0);
-  private nicknameinput: Entities.ExperimentalInputtext;
+  private nicknameinput: Entities.Inputtext;
   private versionLabel: Entities.Label;
 
   constructor(board: Board) {
     super(board);
 
     /** Background */
-    this.background = new Entities.Image(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, "./assets/images/background.jpg");
+    this.background = new Entities.Image("./assets/images/background.jpg", 0, 0, this.board.config.board.size.width, this.board.config.board.size.height);
 
     /** Version Label */
     this.versionLabel = new Entities.Label(this.board.width, this.board.height, Kobbo.GAME_NAME + " v" + Kobbo.GAME_VERSION, board.ctx);
@@ -33,7 +33,7 @@ export class MainStep extends GameStep {
     this.onlineLabel.fontSize = 14;
 
     /** Nickname */
-    this.nicknameinput = new Entities.ExperimentalInputtext(0, 0, 200, 50);
+    this.nicknameinput = new Entities.Inputtext(0, 0, 200, 50);
   }
 
   onEnter(): void {
@@ -44,7 +44,7 @@ export class MainStep extends GameStep {
 
     KobboConfig.setDarkBackground();
 
-    this.pingTimer = { current: 0, max: 1000 };
+    this.ping();
 
     Kobbo.players = [];
     Kobbo.playerIndex = -1;
@@ -74,7 +74,7 @@ export class MainStep extends GameStep {
     this.board.addEntity(this.background);
 
     /** Black overlay */
-    let overlay = new Entities.Square(0, 0, this.board.width, this.board.height, "transparent", "rgba(0,0,0,0.5)");
+    let overlay = new Entities.Rectangle(0, 0, this.board.width, this.board.height, "transparent", "rgba(0,0,0,0.5)");
     this.board.addEntity(overlay);
 
     /** Server status */
@@ -182,7 +182,7 @@ export class MainStep extends GameStep {
       if (res === "pong") {
         this.online();
       }else {
-        this.offline()
+        this.offline();
       }
     }).catch(() => {
       this.offline();

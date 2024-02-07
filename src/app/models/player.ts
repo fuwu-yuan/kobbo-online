@@ -76,12 +76,18 @@ export class Player {
     let playerSpace = this.space as Entities.Container;
     console.log(this.cards);
     let i = this.cards.indexOf(card);
+    console.log("test421");
     if (i > -1) {
+      console.log("test422");
       this.cards[i] = null;
+      console.log("test423");
       if (card.owner === this) {
+        console.log("test424");
         card.owner = null;
+        console.log("test425");
       }
       playerSpace.removeEntity(card);
+      console.log("test426");
     }
     return i;
   }

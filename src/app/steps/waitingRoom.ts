@@ -26,7 +26,7 @@ export class WaitingRoomStep extends GameStep {
 
   constructor(board: Board) {
     super(board);
-    this.background = new Entities.Image(0, 0, this.board.config.board.size.width, this.board.config.board.size.height, "./assets/images/background.jpg");
+    this.background = new Entities.Image("./assets/images/background.jpg", 0, 0, this.board.config.board.size.width, this.board.config.board.size.height, );
     this.messagesService = MessagesService.getInstance();
 
     for (let i = 0; i < 4; i++) {
@@ -43,7 +43,7 @@ export class WaitingRoomStep extends GameStep {
     /** Add background */
     this.board.addEntity(this.background);
     /** Black overlay */
-    let overlay = new Entities.Square(0, 0, this.board.width, this.board.height, "transparent", "rgba(0,0,0,0.5)");
+    let overlay = new Entities.Rectangle(0, 0, this.board.width, this.board.height, "transparent", "rgba(0,0,0,0.5)");
     this.board.addEntity(overlay);
 
 
